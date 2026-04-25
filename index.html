@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concertigo — Ireland's Music Marketplace</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f7f7f5;--bg3:#f0f0ec;--surface:#f7f7f5;
+  --border:#e8e8e4;--border2:#d4d4ce;--text:#0f0f0d;--muted:#888880;
+  --muted2:#b0b0a8;--accent:#1a1a18;--accent-bg:#1a1a18;
+  --lime:#8ab800;--lime-bg:rgba(138,184,0,0.1);--lime-text:#5a7a00;
+  --r:12px;--r2:16px;
+}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+h1,h2,h3{font-family:'Syne',sans-serif}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* NAV */
+nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.logo{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text);letter-spacing:-0.03em}
+.logo span{color:var(--lime)}
+.nav-links{display:flex;gap:0.2rem;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.82rem;cursor:pointer;padding:6px 12px;border-radius:8px;transition:all 0.15s}
+.nav-links a:hover{color:var(--text);background:var(--bg2)}
+.nav-cta{background:var(--accent-bg)!important;color:#fff!important;font-weight:600!important;padding:7px 16px!important;border-radius:8px!important}
+.nav-cta:hover{opacity:0.85!important}
+
+/* SCREENS */
+.screen{display:none}
+.screen.active{display:block;animation:up 0.28s cubic-bezier(0.22,1,0.36,1)}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* HERO */
+.hero{position:relative;padding:5rem 2rem 4.5rem;text-align:center;background:var(--bg);overflow:hidden}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse 75% 75% at 50% 50%,black 0%,transparent 100%);pointer-events:none;opacity:0.5}
+.hero-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border2);color:var(--muted);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:2rem;background:var(--bg)}
+.hero-pill-dot{width:6px;height:6px;border-radius:50%;background:var(--lime)}
+.hero h1{font-size:clamp(2.8rem,7vw,4.8rem);font-weight:800;line-height:1.0;letter-spacing:-0.04em;margin-bottom:1.2rem;color:var(--text)}
+.hero h1 em{font-style:normal;color:var(--lime)}
+.hero-sub{color:var(--muted);font-size:1rem;max-width:400px;margin:0 auto 2.5rem;line-height:1.7;font-weight:300}
+.hero-btns{display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap}
+.btn-p{background:var(--accent-bg);color:#fff;padding:12px 26px;border-radius:10px;font-weight:600;font-size:0.88rem;border:none;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all 0.15s}
+.btn-p:hover{opacity:0.85;transform:translateY(-1px)}
+.btn-g{background:transparent;color:var(--text);padding:12px 26px;border-radius:10px;font-weight:400;font-size:0.88rem;border:1px solid var(--border2);cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all 0.15s}
+.btn-g:hover{border-color:var(--text);background:var(--bg2)}
+
+.stats-row{display:flex;justify-content:center;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2)}
+.stat-item{flex:1;max-width:180px;padding:1.4rem 1rem;text-align:center;border-right:1px solid var(--border)}
+.stat-item:last-child{border-right:none}
+.stat-item .n{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:700;color:var(--text);letter-spacing:-0.03em}
+.stat-item .l{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-top:2px}
+
+.section-wrap{max-width:960px;margin:0 auto;padding:4rem 2rem}
+.section-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--lime-text);margin-bottom:0.6rem;font-weight:600}
+.section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;letter-spacing:-0.03em;margin-bottom:0.5rem;color:var(--text)}
+.section-sub{color:var(--muted);font-size:0.88rem;margin-bottom:2.5rem;font-weight:300}
+
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+@media(max-width:680px){.steps-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:380px){.steps-grid{grid-template-columns:1fr}}
+.step-box{background:var(--bg);padding:1.6rem 1.4rem;transition:background 0.15s}
+.step-box:hover{background:var(--bg2)}
+.step-n{font-family:'Syne',sans-serif;font-size:0.68rem;color:var(--lime-text);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.9rem}
+.step-box h3{font-size:0.92rem;font-weight:600;margin-bottom:0.35rem;letter-spacing:-0.02em;color:var(--text)}
+.step-box p{font-size:0.81rem;color:var(--muted);line-height:1.65;font-weight:300}
+
+.genre-section{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:3rem 2rem;text-align:center}
+.gchips{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin-top:1.5rem}
+.gchip{border:1px solid var(--border2);color:var(--muted);padding:7px 18px;border-radius:20px;font-size:0.81rem;cursor:pointer;transition:all 0.15s;background:var(--bg)}
+.gchip:hover,.gchip.on{background:var(--text);border-color:var(--text);color:#fff;font-weight:500}
+
+.cta-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-top:2rem}
+.cta-box{background:var(--bg);padding:2rem;transition:background 0.15s}
+.cta-box:hover{background:var(--bg2)}
+.cta-icon{font-size:1.8rem;margin-bottom:1rem}
+.cta-box h3{font-size:1rem;font-weight:600;letter-spacing:-0.02em;margin-bottom:0.5rem;color:var(--text)}
+.cta-box p{font-size:0.82rem;color:var(--muted);line-height:1.65;margin-bottom:1.5rem;font-weight:300}
+.cta-box button{background:var(--bg2);color:var(--text);border:1px solid var(--border2);padding:9px 18px;border-radius:8px;font-size:0.82rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;font-weight:500;transition:all 0.15s}
+.cta-box button:hover{background:var(--text);border-color:var(--text);color:#fff}
+
+/* BROWSE */
+.browse-top{background:var(--bg);border-bottom:1px solid var(--border);padding:2rem 2rem 0}
+.browse-top h2{font-size:1.8rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:0.25rem}
+.browse-top p{color:var(--muted);font-size:0.83rem;margin-bottom:1.4rem}
+.search-row{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.s-input{flex:1;min-width:200px;background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text);outline:none;transition:border-color 0.15s}
+.s-input:focus{border-color:var(--text)}
+.s-input::placeholder{color:var(--muted2)}
+.s-sel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'Instrument Sans',sans-serif;font-size:0.84rem;color:var(--muted);outline:none;cursor:pointer}
+.s-btn{background:var(--text);color:#fff;border:none;padding:10px 22px;border-radius:10px;font-weight:600;font-size:0.84rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:opacity 0.15s}
+.s-btn:hover{opacity:0.8}
+.filter-row{display:flex;gap:0.4rem;overflow-x:auto;padding-bottom:1rem}
+.fc{border:1px solid var(--border);color:var(--muted);padding:5px 13px;border-radius:20px;font-size:0.77rem;cursor:pointer;white-space:nowrap;transition:all 0.15s;background:var(--bg)}
+.fc:hover,.fc.on{background:var(--text);border-color:var(--text);color:#fff;font-weight:500}
+
+.browse-body{max-width:1080px;margin:0 auto;padding:2rem}
+.results-meta{font-size:0.77rem;color:var(--muted);margin-bottom:1.2rem}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.mcard{background:var(--bg);cursor:pointer;transition:background 0.15s;position:relative}
+.mcard:hover{background:var(--bg2)}
+.mcard-img{height:130px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;border-bottom:1px solid var(--border)}
+.mbadge{position:absolute;top:10px;left:10px;background:var(--text);color:#fff;font-size:0.62rem;font-weight:700;padding:3px 9px;border-radius:6px;letter-spacing:0.04em;text-transform:uppercase}
+.mcard-body{padding:1rem}
+.mcard-body h3{font-size:0.92rem;font-weight:600;letter-spacing:-0.02em;margin-bottom:3px;color:var(--text)}
+.mcard-meta{font-size:0.76rem;color:var(--muted);margin-bottom:0.65rem}
+.mcard-tags{display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.75rem}
+.tag{font-size:0.67rem;background:var(--lime-bg);color:var(--lime-text);padding:2px 8px;border-radius:6px;font-weight:500}
+.mcard-foot{display:flex;justify-content:space-between;align-items:center}
+.mrate{font-size:0.87rem;font-weight:600;color:var(--text)}
+.mstars{font-size:0.72rem;color:var(--muted)}
+
+/* PROFILE */
+.prof-hero{background:var(--bg);border-bottom:1px solid var(--border);padding:2rem}
+.prof-back{color:var(--muted);font-size:0.81rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-bottom:1.5rem;transition:color 0.15s}
+.prof-back:hover{color:var(--text)}
+.prof-top{display:flex;gap:1.5rem;align-items:flex-end;flex-wrap:wrap}
+.prof-av{width:76px;height:76px;border-radius:14px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0}
+.prof-info h1{font-size:1.65rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:4px;color:var(--text)}
+.prof-info .psub{color:var(--muted);font-size:0.83rem;margin-bottom:0.7rem}
+.pbadges{display:flex;gap:0.4rem;flex-wrap:wrap}
+.pb{font-size:0.67rem;padding:3px 9px;border-radius:6px;font-weight:500}
+.pb-lime{background:var(--lime-bg);color:var(--lime-text)}
+.pb-dim{background:var(--bg2);color:var(--muted);border:1px solid var(--border)}
+.prof-tabs{display:flex;gap:0;margin-top:1.5rem;border-top:1px solid var(--border)}
+.ptab{color:var(--muted);font-size:0.82rem;padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s}
+.ptab.on{color:var(--text);border-bottom-color:var(--text);font-weight:500}
+
+.prof-body{max-width:880px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 272px;gap:1.5rem;align-items:start}
+@media(max-width:660px){.prof-body{grid-template-columns:1fr}}
+.prof-section{margin-bottom:2rem}
+.prof-section h3{font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.9rem;font-family:'Syne',sans-serif;font-weight:700}
+.prof-section p{font-size:0.87rem;color:var(--muted);line-height:1.75;font-weight:300}
+.prof-section p+p{margin-top:0.6rem}
+
+.samples{display:flex;flex-direction:column;gap:0.4rem}
+.sample{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:0.85rem;display:flex;align-items:center;gap:0.8rem;cursor:pointer;transition:border-color 0.15s}
+.sample:hover{border-color:var(--border2)}
+.sample.playing{border-color:var(--text)}
+.play{width:30px;height:30px;border-radius:7px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.65rem;flex-shrink:0;color:var(--muted);transition:all 0.15s}
+.sample.playing .play{background:var(--text);color:#fff;border-color:var(--text)}
+.sinfo{flex:1}
+.sinfo .st{font-size:0.82rem;font-weight:500;color:var(--text)}
+.sinfo .sd{font-size:0.7rem;color:var(--muted);margin-top:2px}
+.sbar{height:2px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
+.sbar-fill{height:100%;background:var(--lime);border-radius:2px;width:0;transition:width 0.4s}
+.sample.playing .sbar-fill{width:32%}
+
+.rev{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.5rem}
+.rev .rname{font-size:0.82rem;font-weight:500;margin-bottom:2px;color:var(--text)}
+.rev .rvenue{font-size:0.7rem;color:var(--muted);margin-bottom:0.5rem}
+.rev p{font-size:0.81rem;color:var(--muted);line-height:1.65;font-weight:300}
+
+.book-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);padding:1.4rem;position:sticky;top:72px}
+.bprice{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:-0.03em;color:var(--text);margin-bottom:1.2rem}
+.bprice span{font-family:'Instrument Sans',sans-serif;font-size:0.8rem;color:var(--muted);font-weight:300}
+.fg{margin-bottom:0.8rem}
+.fg label{display:block;font-size:0.67rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:5px;font-weight:600}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.84rem;color:var(--text);outline:none;transition:border-color 0.15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--text)}
+.fg input::placeholder{color:var(--muted2)}
+.fg textarea{height:68px;resize:none}
+.send-btn{width:100%;background:var(--text);color:#fff;border:none;padding:11px;border-radius:10px;font-size:0.87rem;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:opacity 0.15s;margin-bottom:0.6rem}
+.send-btn:hover{opacity:0.82}
+.book-note{font-size:0.7rem;color:var(--muted2);text-align:center;line-height:1.5}
+
+/* VENUE DASH */
+.dash-top{background:var(--bg);border-bottom:1px solid var(--border);padding:2rem}
+.dash-top h2{font-size:1.8rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:3px;color:var(--text)}
+.dash-top p{color:var(--muted);font-size:0.83rem}
+.dash-body{max-width:900px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:600px){.dash-body{grid-template-columns:1fr}}
+.dcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);padding:1.4rem}
+.dcard h3{font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:1rem;font-family:'Syne',sans-serif;font-weight:700}
+.dcard.full{grid-column:1/-1}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:0.7rem}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center}
+.kpi .kv{font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:700;color:var(--text);letter-spacing:-0.03em}
+.kpi .kl{font-size:0.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-top:2px}
+.enq{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:0.8rem;background:var(--bg2);border:1px solid var(--border);border-radius:9px;margin-bottom:0.45rem}
+.enq h4{font-size:0.83rem;font-weight:500;margin-bottom:2px;color:var(--text)}
+.enq p{font-size:0.73rem;color:var(--muted)}
+.enq-btns{display:flex;gap:0.35rem;flex-shrink:0}
+.ba{font-size:0.71rem;padding:5px 11px;border-radius:7px;border:none;cursor:pointer;font-family:'Instrument Sans',sans-serif;font-weight:500;transition:all 0.15s}
+.ba-yes{background:var(--text);color:#fff}
+.ba-yes:hover{opacity:0.8}
+.ba-no{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+.ba-no:hover{color:var(--text)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cd-h{font-size:0.6rem;color:var(--muted);text-align:center;padding-bottom:3px;text-transform:uppercase;letter-spacing:0.05em}
+.cd{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.69rem;color:var(--muted2);background:var(--bg2)}
+.cd.bk{background:var(--text);color:#fff;font-weight:500}
+.cd.pd{background:var(--bg3);color:var(--muted);border:1px solid var(--border2)}
+.cd.td{border:1.5px solid var(--border2);color:var(--text);font-weight:600}
+.cal-legend{display:flex;gap:1rem;margin-top:0.7rem;font-size:0.67rem;color:var(--muted)}
+.cl-dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle}
+
+/* SIGNUP */
+.su-wrap{max-width:420px;margin:0 auto;padding:3rem 2rem}
+.su-wrap h2{font-size:1.9rem;font-weight:700;letter-spacing:-0.04em;margin-bottom:0.3rem;color:var(--text)}
+.su-sub{color:var(--muted);font-size:0.87rem;margin-bottom:2rem;font-weight:300}
+.toggle-row{display:flex;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:3px;gap:3px;margin-bottom:1.8rem}
+.topt{flex:1;text-align:center;padding:9px;border-radius:7px;font-size:0.84rem;cursor:pointer;transition:all 0.18s;color:var(--muted);font-family:'Instrument Sans',sans-serif}
+.topt.on{background:var(--text);color:#fff;font-weight:600}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem}
+.sfg{margin-bottom:0.8rem}
+.sfg label{display:block;font-size:0.67rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:5px;font-weight:600}
+.sfg input,.sfg select{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text);outline:none;transition:border-color 0.15s}
+.sfg input:focus,.sfg select:focus{border-color:var(--text)}
+.sfg input::placeholder{color:var(--muted2)}
+.sub-btn{width:100%;background:var(--text);color:#fff;border:none;padding:12px;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:opacity 0.15s;margin-top:0.4rem}
+.sub-btn:hover{opacity:0.82}
+.su-foot{text-align:center;font-size:0.81rem;color:var(--muted);margin-top:1.1rem}
+.su-foot a{color:var(--text);cursor:pointer;text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">concert<span>igo</span></div>
+  <div class="nav-links">
+    <a onclick="go('browse')">Find Musicians</a>
+    <a onclick="go('dash')">For Venues</a>
+    <a onclick="go('signup')" class="nav-cta">Join Free</a>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div id="s-landing" class="screen active">
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-pill"><span class="hero-pill-dot"></span>Ireland's music marketplace</div>
+    <h1>Live music,<br><em>made simple.</em></h1>
+    <p class="hero-sub">Connect with Ireland's best musicians. Book a trad session, a jazz night, a wedding band — directly, no agents.</p>
+    <div class="hero-btns">
+      <button class="btn-p" onclick="go('browse')">Browse Musicians</button>
+      <button class="btn-g" onclick="go('signup')">List Your Act</button>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-item"><div class="n">1,200+</div><div class="l">Musicians</div></div>
+    <div class="stat-item"><div class="n">400+</div><div class="l">Venues</div></div>
+    <div class="stat-item"><div class="n">32</div><div class="l">Counties</div></div>
+    <div class="stat-item"><div class="n">€250k</div><div class="l">Paid to artists</div></div>
+  </div>
+  <div class="section-wrap">
+    <div class="section-label">How it works</div>
+    <div class="section-title">From search to soundcheck.</div>
+    <p class="section-sub">Book a verified musician in minutes — no phone tag, no agents.</p>
+    <div class="steps-grid">
+      <div class="step-box"><div class="step-n">01 — Browse</div><h3>Search & filter</h3><p>Filter by genre, county, date and budget. Listen to samples before committing.</p></div>
+      <div class="step-box"><div class="step-n">02 — Connect</div><h3>Send an enquiry</h3><p>Message directly with your date and requirements. Response within 24h.</p></div>
+      <div class="step-box"><div class="step-n">03 — Book</div><h3>Confirm securely</h3><p>Pay a deposit through Concertigo. Contracts and payments all handled.</p></div>
+      <div class="step-box"><div class="step-n">04 — Enjoy</div><h3>Enjoy the night</h3><p>Leave a review after the gig. Build your roster of trusted acts.</p></div>
+    </div>
+  </div>
+  <div class="genre-section">
+    <div class="section-label" style="margin-bottom:0.5rem">Every sound</div>
+    <div class="section-title">Every genre, every occasion.</div>
+    <div class="gchips">
+      <span class="gchip on">Trad / Folk</span><span class="gchip">Jazz</span><span class="gchip">Rock / Indie</span>
+      <span class="gchip">Wedding Bands</span><span class="gchip">Acoustic Solo</span><span class="gchip">Classical</span>
+      <span class="gchip">Blues</span><span class="gchip">Country</span><span class="gchip">Irish Ballads</span><span class="gchip">Soul / R&amp;B</span>
+    </div>
+  </div>
+  <div class="section-wrap">
+    <div class="section-label">Get started</div>
+    <div class="section-title">Join Concertigo today.</div>
+    <p class="section-sub">Free to join. Commission only on confirmed bookings.</p>
+    <div class="cta-split">
+      <div class="cta-box">
+        <div class="cta-icon">🎸</div>
+        <h3>For Musicians</h3>
+        <p>Create a profile, upload samples, set your rates and get discovered by hundreds of Irish venues actively looking to book.</p>
+        <button onclick="go('signup')">Create artist profile →</button>
+      </div>
+      <div class="cta-box">
+        <div class="cta-icon">🏛</div>
+        <h3>For Venues</h3>
+        <p>Browse verified musicians, check availability, send booking requests and manage everything from your dashboard.</p>
+        <button onclick="go('dash')">View venue dashboard →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BROWSE -->
+<div id="s-browse" class="screen">
+  <div class="browse-top">
+    <h2>Find musicians</h2>
+    <p>1,200+ verified acts across Ireland</p>
+    <div class="search-row">
+      <input class="s-input" type="text" placeholder="Search by name, genre or keyword…">
+      <select class="s-sel">
+        <option>All Ireland</option><option>Dublin</option><option>Cork</option>
+        <option>Galway</option><option>Limerick</option><option>Kilkenny</option>
+      </select>
+      <button class="s-btn">Search</button>
+    </div>
+    <div class="filter-row">
+      <span class="fc on" onclick="tfc(this)">All genres</span>
+      <span class="fc" onclick="tfc(this)">Trad / Folk</span>
+      <span class="fc" onclick="tfc(this)">Jazz</span>
+      <span class="fc" onclick="tfc(this)">Rock</span>
+      <span class="fc" onclick="tfc(this)">Acoustic</span>
+      <span class="fc" onclick="tfc(this)">Wedding</span>
+      <span class="fc" onclick="tfc(this)">Under €300</span>
+      <span class="fc" onclick="tfc(this)">Top rated</span>
+    </div>
+  </div>
+  <div class="browse-body">
+    <p class="results-meta">Showing 8 musicians near you</p>
+    <div class="mgrid" id="mgrid"></div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="s-profile" class="screen">
+  <div class="prof-hero">
+    <div class="prof-back" onclick="go('browse')">← Back to results</div>
+    <div class="prof-top">
+      <div class="prof-av">🎻</div>
+      <div class="prof-info">
+        <h1>Siobhán &amp; The Reel</h1>
+        <div class="psub">Traditional Irish · Dublin · Trio</div>
+        <div class="pbadges">
+          <span class="pb pb-lime">★ 4.9 — 87 reviews</span>
+          <span class="pb pb-dim">✓ Verified</span>
+          <span class="pb pb-dim">Available this month</span>
+        </div>
+      </div>
+    </div>
+    <div class="prof-tabs">
+      <div class="ptab on">Overview</div>
+      <div class="ptab">Samples</div>
+      <div class="ptab">Reviews</div>
+    </div>
+  </div>
+  <div class="prof-body">
+    <div>
+      <div class="prof-section">
+        <h3>About</h3>
+        <p>Siobhán &amp; The Reel is a Dublin-based traditional Irish trio bringing authentic trad sessions to pubs, festivals, and private events across Leinster and beyond. We specialise in high-energy sets that get people dancing, as well as atmospheric background sessions for dining and events.</p>
+        <p>We've performed at Whelans, The Cobblestone, Electric Picnic, and dozens of county festivals. Fully insured, professional setup, PA available if required.</p>
+      </div>
+      <div class="prof-section">
+        <h3>Audio samples</h3>
+        <div class="samples">
+          <div class="sample playing" onclick="tplay(this)"><div class="play">▶</div><div class="sinfo"><div class="st">The Morning Dew (Reel medley)</div><div class="sd">3:42</div><div class="sbar"><div class="sbar-fill"></div></div></div></div>
+          <div class="sample" onclick="tplay(this)"><div class="play">▶</div><div class="sinfo"><div class="st">Galway Girl (Session set)</div><div class="sd">4:15</div><div class="sbar"><div class="sbar-fill"></div></div></div></div>
+          <div class="sample" onclick="tplay(this)"><div class="play">▶</div><div class="sinfo"><div class="st">Whiskey in the Jar (Live at Whelans)</div><div class="sd">5:02</div><div class="sbar"><div class="sbar-fill"></div></div></div></div>
+        </div>
+      </div>
+      <div class="prof-section">
+        <h3>Reviews</h3>
+        <div class="rev"><div class="rname">Ciarán Murphy ★★★★★</div><div class="rvenue">The Horse &amp; Hound, Kilkenny</div><p>"Absolutely brilliant night. Siobhán and the lads had the whole place up dancing by 10pm. Already rebooked for St. Patrick's weekend."</p></div>
+        <div class="rev"><div class="rname">Aoife Walsh ★★★★★</div><div class="rvenue">The Harbour Hotel, Galway</div><p>"Professional, punctual, and phenomenal. Our guests were blown away. Highly recommend for any venue looking for authentic trad."</p></div>
+        <div class="rev"><div class="rname">Declan O'Brien ★★★★☆</div><div class="rvenue">Mulligan's Bar, Dublin</div><p>"Great set, really engaging with the crowd. Slight delay on setup but nothing major. Would definitely book again."</p></div>
+      </div>
+    </div>
+    <div>
+      <div class="book-card">
+        <div class="bprice">€350 <span>/ 2hr set</span></div>
+        <div class="fg"><label>Event date</label><input type="date"></div>
+        <div class="fg"><label>Event type</label><select><option>Pub session</option><option>Private event</option><option>Wedding</option><option>Festival</option><option>Corporate</option></select></div>
+        <div class="fg"><label>Venue name</label><input type="text" placeholder="e.g. The Cobblestone"></div>
+        <div class="fg"><label>Message</label><textarea placeholder="Tell Siobhán about your venue…"></textarea></div>
+        <button class="send-btn" onclick="alert('Enquiry sent! Siobhán will respond within 24 hours.')">Send enquiry →</button>
+        <div class="book-note">Free to enquire · No payment now · 10% on confirmation</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VENUE DASH -->
+<div id="s-dash" class="screen">
+  <div class="dash-top">
+    <h2>Venue dashboard</h2>
+    <p>The Cobblestone, Smithfield · Dublin 7</p>
+  </div>
+  <div class="dash-body">
+    <div class="dcard full">
+      <h3>May at a glance</h3>
+      <div class="kpis">
+        <div class="kpi"><div class="kv">6</div><div class="kl">Confirmed</div></div>
+        <div class="kpi"><div class="kv">3</div><div class="kl">Pending</div></div>
+        <div class="kpi"><div class="kv">€2,100</div><div class="kl">Committed</div></div>
+      </div>
+    </div>
+    <div class="dcard">
+      <h3>Pending enquiries</h3>
+      <div class="enq"><div><h4>Seán Ó Murchú</h4><p>Sat 3 May · Acoustic Folk · €280</p></div><div class="enq-btns"><button class="ba ba-yes">Accept</button><button class="ba ba-no">Decline</button></div></div>
+      <div class="enq"><div><h4>The Liffey Jazz Quartet</h4><p>Fri 9 May · Jazz · €450</p></div><div class="enq-btns"><button class="ba ba-yes">Accept</button><button class="ba ba-no">Decline</button></div></div>
+      <div class="enq"><div><h4>Máire Ní Fhlathartha</h4><p>Sun 11 May · Trad · €200</p></div><div class="enq-btns"><button class="ba ba-yes">Accept</button><button class="ba ba-no">Decline</button></div></div>
+    </div>
+    <div class="dcard">
+      <h3>May calendar</h3>
+      <div class="cal">
+        <div class="cd-h">M</div><div class="cd-h">T</div><div class="cd-h">W</div><div class="cd-h">T</div><div class="cd-h">F</div><div class="cd-h">S</div><div class="cd-h">S</div>
+        <div class="cd"></div><div class="cd"></div><div class="cd">1</div><div class="cd">2</div><div class="cd bk">3</div><div class="cd bk">4</div><div class="cd">5</div>
+        <div class="cd">6</div><div class="cd">7</div><div class="cd">8</div><div class="cd pd">9</div><div class="cd bk">10</div><div class="cd pd">11</div><div class="cd">12</div>
+        <div class="cd">13</div><div class="cd">14</div><div class="cd">15</div><div class="cd">16</div><div class="cd">17</div><div class="cd bk">18</div><div class="cd">19</div>
+        <div class="cd">20</div><div class="cd">21</div><div class="cd">22</div><div class="cd">23</div><div class="cd td">24</div><div class="cd bk">25</div><div class="cd bk">26</div>
+        <div class="cd">27</div><div class="cd">28</div><div class="cd">29</div><div class="cd">30</div><div class="cd">31</div>
+      </div>
+      <div class="cal-legend">
+        <span><span class="cl-dot" style="background:var(--text)"></span>Booked</span>
+        <span><span class="cl-dot" style="background:var(--bg3);border:1px solid var(--border2)"></span>Pending</span>
+      </div>
+    </div>
+    <div class="dcard full" style="text-align:center;padding:2rem">
+      <div style="font-size:1.4rem;margin-bottom:0.5rem">🎵</div>
+      <div style="font-size:0.92rem;font-weight:600;color:var(--text);margin-bottom:0.35rem">Need to book an act?</div>
+      <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1.2rem;font-weight:300">Browse 1,200+ verified musicians and send an enquiry in minutes.</p>
+      <button class="btn-p" onclick="go('browse')">Browse musicians →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP -->
+<div id="s-signup" class="screen">
+  <div class="su-wrap">
+    <h2>Join Concertigo</h2>
+    <p class="su-sub">Free to join. Commission only on confirmed bookings.</p>
+    <div class="toggle-row">
+      <div class="topt on" onclick="setR(this,'m')">I'm a musician</div>
+      <div class="topt" onclick="setR(this,'v')">I'm a venue</div>
+    </div>
+    <div class="frow">
+      <div class="sfg"><label>First name</label><input type="text" placeholder="Siobhán"></div>
+      <div class="sfg"><label>Last name</label><input type="text" placeholder="Murphy"></div>
+    </div>
+    <div class="sfg"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+    <div class="sfg" id="an"><label>Act / band name</label><input type="text" placeholder="e.g. The Reel Sisters"></div>
+    <div class="sfg"><label>County</label><select><option>Dublin</option><option>Cork</option><option>Galway</option><option>Limerick</option><option>Kilkenny</option><option>Clare</option><option>Kerry</option><option>Tipperary</option><option>Waterford</option><option>Wexford</option></select></div>
+    <div class="sfg" id="gn"><label>Primary genre</label><select><option>Trad / Folk</option><option>Jazz</option><option>Rock / Indie</option><option>Acoustic Solo</option><option>Wedding Band</option><option>Classical</option><option>Blues</option><option>Irish Ballads</option></select></div>
+    <div class="sfg"><label>Password</label><input type="password" placeholder="Min 8 characters"></div>
+    <button class="sub-btn">Create free account →</button>
+    <div class="su-foot">Already have an account? <a onclick="go('dash')">Sign in</a></div>
+  </div>
+</div>
+
+<script>
+const ms=[
+  {name:"Siobhán & The Reel",type:"Traditional Irish Trio",loc:"Dublin",rate:"€350",rating:"4.9",n:87,tags:["Trad","Folk"],emoji:"🎻",badge:"Top Rated",bg:"#f0f5f2"},
+  {name:"Declan Mór",type:"Acoustic Solo",loc:"Cork",rate:"€180",rating:"4.8",n:42,tags:["Acoustic","Ballads"],emoji:"🎸",bg:"#f5f5f0"},
+  {name:"The Liffey Jazz Quartet",type:"Jazz Ensemble",loc:"Dublin",rate:"€550",rating:"4.9",n:63,tags:["Jazz","Swing"],emoji:"🎷",badge:"Popular",bg:"#f0f2f5"},
+  {name:"Éilis Ní Bhriain",type:"Trad Fiddle",loc:"Galway",rate:"€200",rating:"5.0",n:29,tags:["Trad","Céilí"],emoji:"🎵",badge:"Rising Star",bg:"#f5f0f5"},
+  {name:"The Atlantic Rovers",type:"Rock / Folk Band",loc:"Limerick",rate:"€480",rating:"4.7",n:51,tags:["Rock","Folk"],emoji:"🎤",bg:"#f5f0f0"},
+  {name:"Maeve & Collins",type:"Acoustic Duo",loc:"Kilkenny",rate:"€260",rating:"4.8",n:38,tags:["Acoustic","Pop"],emoji:"🎶",bg:"#f0f5f5"},
+  {name:"Padraig Walsh",type:"Irish Ballads Solo",loc:"Kerry",rate:"€150",rating:"4.9",n:18,tags:["Ballads","Solo"],emoji:"🎼",bg:"#f2f5f0"},
+  {name:"The Copper Coast Band",type:"Wedding Band",loc:"Waterford",rate:"€900",rating:"4.8",n:97,tags:["Wedding","Pop"],emoji:"🎹",badge:"Wedding Specialist",bg:"#f5f2f0"},
+];
+
+function rGrid(){
+  document.getElementById('mgrid').innerHTML=ms.map(m=>`
+    <div class="mcard" onclick="go('profile')">
+      <div class="mcard-img" style="background:${m.bg}">
+        <span style="font-size:2.4rem">${m.emoji}</span>
+        ${m.badge?`<div class="mbadge">${m.badge}</div>`:''}
+      </div>
+      <div class="mcard-body">
+        <h3>${m.name}</h3>
+        <div class="mcard-meta">${m.type} · ${m.loc}</div>
+        <div class="mcard-tags">${m.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="mcard-foot"><span class="mrate">${m.rate}/set</span><span class="mstars">★ ${m.rating} (${m.n})</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function go(s){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.getElementById('s-'+s).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(s==='browse') rGrid();
+}
+function tfc(el){el.classList.toggle('on')}
+function tplay(el){
+  document.querySelectorAll('.sample').forEach(s=>s.classList.remove('playing'));
+  el.classList.add('playing');
+}
+function setR(el,r){
+  document.querySelectorAll('.topt').forEach(o=>o.classList.remove('on'));
+  el.classList.add('on');
+  const an=document.getElementById('an'),gn=document.getElementById('gn');
+  if(r==='v'){
+    an.querySelector('label').textContent='Venue name';
+    an.querySelector('input').placeholder='e.g. The Cobblestone';
+    gn.style.display='none';
+  } else {
+    an.querySelector('label').textContent='Act / band name';
+    an.querySelector('input').placeholder='e.g. The Reel Sisters';
+    gn.style.display='block';
+  }
+}
+</script>
+</body>
+</html>
