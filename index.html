@@ -271,7 +271,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
   <div class="section-wrap">
     <div class="section-label">Get started</div>
     <div class="section-title">Join Concertigo today.</div>
-    <p class="section-sub">Free to join. Commission only on confirmed bookings.</p>
+    <p class="section-sub">Free for musicians. €20 one-time signup for venues.</p>
     <div class="cta-split">
       <div class="cta-box">
         <div class="cta-icon">🎸</div>
@@ -282,7 +282,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
       <div class="cta-box">
         <div class="cta-icon">🏛</div>
         <h3>For Venues</h3>
-        <p>Browse verified musicians, check availability, send booking requests and manage everything from your dashboard.</p>
+        <p>Browse verified musicians, check availability, send booking requests and manage everything from your dashboard. One-time €20 signup.</p>
         <button onclick="go('dash')">View venue dashboard →</button>
       </div>
     </div>
@@ -371,7 +371,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
         <div class="fg"><label>Venue name</label><input type="text" placeholder="e.g. The Cobblestone"></div>
         <div class="fg"><label>Message</label><textarea placeholder="Tell Siobhán about your venue…"></textarea></div>
         <button class="send-btn" onclick="alert('Enquiry sent! Siobhán will respond within 24 hours.')">Send enquiry →</button>
-        <div class="book-note">Free to enquire · No payment now · 10% on confirmation</div>
+        <div class="book-note">Free to enquire · No payment now</div>
       </div>
     </div>
   </div>
@@ -426,7 +426,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 <div id="s-signup" class="screen">
   <div class="su-wrap">
     <h2>Join Concertigo</h2>
-    <p class="su-sub">Free to join. Commission only on confirmed bookings.</p>
+    <p class="su-sub" id="su-sub-text">Free to join as a musician.</p>
     <div class="toggle-row">
       <div class="topt on" onclick="setR(this,'m')">I'm a musician</div>
       <div class="topt" onclick="setR(this,'v')">I'm a venue</div>
@@ -436,16 +436,216 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
       <div class="sfg"><label>Last name</label><input type="text" placeholder="Murphy"></div>
     </div>
     <div class="sfg"><label>Email</label><input type="email" placeholder="you@example.com"></div>
-    <div class="sfg" id="an"><label>Act / band name</label><input type="text" placeholder="e.g. The Reel Sisters"></div>
-    <div class="sfg"><label>County</label><select><option>Dublin</option><option>Cork</option><option>Galway</option><option>Limerick</option><option>Kilkenny</option><option>Clare</option><option>Kerry</option><option>Tipperary</option><option>Waterford</option><option>Wexford</option></select></div>
-    <div class="sfg" id="gn"><label>Primary genre</label><select><option>Trad / Folk</option><option>Jazz</option><option>Rock / Indie</option><option>Acoustic Solo</option><option>Wedding Band</option><option>Classical</option><option>Blues</option><option>Irish Ballads</option></select></div>
-    <div class="sfg"><label>Password</label><input type="password" placeholder="Min 8 characters"></div>
-    <button class="sub-btn">Create free account →</button>
-    <div class="su-foot">Already have an account? <a onclick="go('dash')">Sign in</a></div>
+    <div class="sfg" id="an"><label>Act / band name</label><input id="su-actname" type="text" placeholder="e.g. The Reel Sisters"></div>
+    <div class="sfg"><label>County</label><select id="su-county"><option>Dublin</option><option>Cork</option><option>Galway</option><option>Limerick</option><option>Kilkenny</option><option>Clare</option><option>Kerry</option><option>Tipperary</option><option>Waterford</option><option>Wexford</option></select></div>
+    <div class="sfg" id="gn"><label>Primary genre</label><select id="su-genre"><option>Trad / Folk</option><option>Jazz</option><option>Rock / Indie</option><option>Acoustic Solo</option><option>Wedding Band</option><option>Classical</option><option>Blues</option><option>Irish Ballads</option></select></div>
+    <div class="sfg"><label>Password</label><input id="su-password" type="password" placeholder="Min 8 characters"></div>
+    <div id="su-error" style="color:#c0392b;font-size:0.8rem;margin-bottom:0.5rem;display:none"></div>
+    <div id="su-success" style="color:#27ae60;font-size:0.8rem;margin-bottom:0.5rem;display:none"></div>
+    <button class="sub-btn" onclick="handleSignup()">Create free account →</button>
+    <div class="su-foot">Already have an account? <a onclick="go('login')">Sign in</a></div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="s-login" class="screen">
+  <div class="su-wrap">
+    <h2>Welcome back</h2>
+    <p class="su-sub">Sign in to your Concertigo account.</p>
+    <div class="sfg"><label>Email</label><input id="li-email" type="email" placeholder="you@example.com"></div>
+    <div class="sfg"><label>Password</label><input id="li-password" type="password" placeholder="Your password"></div>
+    <div id="li-error" style="color:#c0392b;font-size:0.8rem;margin-bottom:0.5rem;display:none"></div>
+    <button class="sub-btn" onclick="handleLogin()">Sign in →</button>
+    <div class="su-foot">Don't have an account? <a onclick="go('signup')">Join free</a></div>
   </div>
 </div>
 
 <script>
+// ── Supabase ──────────────────────────────────────────────
+const SUPA_URL = 'https://dsbtlltxfrcdjsbdfvxw.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzYnRsbHR4ZnJjZGpzYmRmdnh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MDA2MTYsImV4cCI6MjA5Mjk3NjYxNn0.vT8Wju5iDrWnEd3GVbUSnD3x_iHLiXuDRHh-vRvkmJ4';
+
+async function supaFetch(path, options={}) {
+  const res = await fetch(SUPA_URL + path, {
+    ...options,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + (currentSession?.access_token || SUPA_KEY),
+      'Content-Type': 'application/json',
+      ...options.headers
+    }
+  });
+  return res;
+}
+
+let currentSession = null;
+let currentRole = 'musician';
+
+// Check for existing session on load
+async function initAuth() {
+  const stored = localStorage.getItem('sb-session');
+  if (stored) {
+    try {
+      currentSession = JSON.parse(stored);
+      updateNavForUser();
+    } catch(e) {}
+  }
+}
+
+function updateNavForUser() {
+  const cta = document.querySelector('.nav-cta');
+  if (currentSession) {
+    cta.textContent = 'Dashboard';
+    cta.onclick = () => go('dash');
+  } else {
+    cta.textContent = 'Join Free';
+    cta.onclick = () => go('signup');
+  }
+}
+
+async function handleSignup() {
+  const firstName = document.querySelector('#s-signup .frow .sfg:first-child input').value.trim();
+  const lastName = document.querySelector('#s-signup .frow .sfg:last-child input').value.trim();
+  const email = document.querySelector('#s-signup .sfg:nth-child(3) input').value.trim();
+  const actName = document.getElementById('su-actname').value.trim();
+  const county = document.getElementById('su-county').value;
+  const genre = document.getElementById('su-genre').value;
+  const password = document.getElementById('su-password').value;
+  const errEl = document.getElementById('su-error');
+  const successEl = document.getElementById('su-success');
+
+  errEl.style.display = 'none';
+  successEl.style.display = 'none';
+
+  if (!firstName || !email || !password) {
+    errEl.textContent = 'Please fill in all required fields.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (password.length < 8) {
+    errEl.textContent = 'Password must be at least 8 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.querySelector('#s-signup .sub-btn');
+  btn.textContent = 'Creating account…';
+  btn.disabled = true;
+
+  try {
+    // Sign up with Supabase Auth
+    const res = await fetch(SUPA_URL + '/auth/v1/signup', {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      errEl.textContent = data.error.message || 'Signup failed. Please try again.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Create free account →';
+      btn.disabled = false;
+      return;
+    }
+
+    // Save session
+    if (data.access_token) {
+      currentSession = data;
+      localStorage.setItem('sb-session', JSON.stringify(data));
+
+      // Save profile
+      await fetch(SUPA_URL + '/rest/v1/profiles', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + data.access_token,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          id: data.user.id,
+          role: currentRole,
+          first_name: firstName,
+          last_name: lastName,
+          act_name: actName,
+          county,
+          genre: currentRole === 'musician' ? genre : null
+        })
+      });
+
+      updateNavForUser();
+      successEl.textContent = '🎉 Account created! Welcome to Concertigo.';
+      successEl.style.display = 'block';
+      btn.textContent = 'Create free account →';
+      btn.disabled = false;
+      setTimeout(() => go('landing'), 1500);
+    } else {
+      // Email confirmation required
+      successEl.textContent = '✅ Check your email to confirm your account!';
+      successEl.style.display = 'block';
+      btn.textContent = 'Create free account →';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Create free account →';
+    btn.disabled = false;
+  }
+}
+
+async function handleLogin() {
+  const email = document.getElementById('li-email').value.trim();
+  const password = document.getElementById('li-password').value;
+  const errEl = document.getElementById('li-error');
+  errEl.style.display = 'none';
+
+  const btn = document.querySelector('#s-login .sub-btn');
+  btn.textContent = 'Signing in…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(SUPA_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      errEl.textContent = data.error.message || 'Invalid email or password.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Sign in →';
+      btn.disabled = false;
+      return;
+    }
+
+    currentSession = data;
+    localStorage.setItem('sb-session', JSON.stringify(data));
+    updateNavForUser();
+    btn.textContent = 'Sign in →';
+    btn.disabled = false;
+    go('landing');
+  } catch(e) {
+    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Sign in →';
+    btn.disabled = false;
+  }
+}
+
+// Add IDs to signup form fields
+document.addEventListener('DOMContentLoaded', () => {
+  const suWrap = document.querySelector('#s-signup .su-wrap');
+  const inputs = suWrap.querySelectorAll('.frow input');
+  if(inputs[0]) inputs[0].id = 'su-firstname';
+  if(inputs[1]) inputs[1].id = 'su-lastname';
+  const emailInput = suWrap.querySelector('input[type="email"]');
+  if(emailInput) emailInput.id = 'su-email';
+  initAuth();
+});
+
 const ms=[
   {name:"Siobhán & The Reel",type:"Traditional Irish Trio",loc:"Dublin",rate:"€350",rating:"4.9",n:87,tags:["Trad","Folk"],emoji:"🎻",badge:"Top Rated",bg:"#f0f5f2"},
   {name:"Declan Mór",type:"Acoustic Solo",loc:"Cork",rate:"€180",rating:"4.8",n:42,tags:["Acoustic","Ballads"],emoji:"🎸",bg:"#f5f5f0"},
@@ -485,17 +685,21 @@ function tplay(el){
   el.classList.add('playing');
 }
 function setR(el,r){
+  currentRole = r;
   document.querySelectorAll('.topt').forEach(o=>o.classList.remove('on'));
   el.classList.add('on');
   const an=document.getElementById('an'),gn=document.getElementById('gn');
+  const subText=document.getElementById('su-sub-text');
   if(r==='v'){
     an.querySelector('label').textContent='Venue name';
     an.querySelector('input').placeholder='e.g. The Cobblestone';
     gn.style.display='none';
+    if(subText) subText.textContent='€20 one-time signup fee for venues.';
   } else {
     an.querySelector('label').textContent='Act / band name';
     an.querySelector('input').placeholder='e.g. The Reel Sisters';
     gn.style.display='block';
+    if(subText) subText.textContent='Free to join as a musician.';
   }
 }
 </script>
