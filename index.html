@@ -222,7 +222,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 
 <!-- NAV -->
 <nav>
-  <div class="logo">concert<span>igo</span></div>
+  <div class="logo" onclick="go('landing')" style="cursor:pointer">concert<span>igo</span></div>
   <div class="nav-links">
     <a onclick="go('browse')">Find Musicians</a>
     <a onclick="go('dash')">For Venues</a>
@@ -243,10 +243,9 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
     </div>
   </div>
   <div class="stats-row">
-    <div class="stat-item"><div class="n">1,200+</div><div class="l">Musicians</div></div>
-    <div class="stat-item"><div class="n">400+</div><div class="l">Venues</div></div>
+    <div class="stat-item"><div class="n" id="stat-musicians">—</div><div class="l">Musicians</div></div>
+    <div class="stat-item"><div class="n" id="stat-venues">—</div><div class="l">Venues</div></div>
     <div class="stat-item"><div class="n">32</div><div class="l">Counties</div></div>
-    <div class="stat-item"><div class="n">€250k</div><div class="l">Paid to artists</div></div>
   </div>
   <div class="section-wrap">
     <div class="section-label">How it works</div>
@@ -293,7 +292,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 <div id="s-browse" class="screen">
   <div class="browse-top">
     <h2>Find musicians</h2>
-    <p>1,200+ verified acts across Ireland</p>
+    <p>Musicians available across Ireland</p>
     <div class="search-row">
       <input class="s-input" type="text" placeholder="Search by name, genre or keyword…">
       <select class="s-sel">
@@ -326,7 +325,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
     <div class="prof-top">
       <div class="prof-av">🎻</div>
       <div class="prof-info">
-        <h1>Siobhan &amp; The Reel</h1>
+        <h1>Siobhán &amp; The Reel</h1>
         <div class="psub">Traditional Irish · Dublin · Trio</div>
         <div class="pbadges">
           <span class="pb pb-lime">★ 4.9 — 87 reviews</span>
@@ -644,33 +643,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const emailInput = suWrap.querySelector('input[type="email"]');
   if(emailInput) emailInput.id = 'su-email';
   initAuth();
+  loadStats();
 });
 
-const ms=[
-  {name:"Siobhán & The Reel",type:"Traditional Irish Trio",loc:"Dublin",rate:"€350",rating:"4.9",n:87,tags:["Trad","Folk"],emoji:"🎻",badge:"Top Rated",bg:"#f0f5f2"},
-  {name:"Declan Mór",type:"Acoustic Solo",loc:"Cork",rate:"€180",rating:"4.8",n:42,tags:["Acoustic","Ballads"],emoji:"🎸",bg:"#f5f5f0"},
-  {name:"The Liffey Jazz Quartet",type:"Jazz Ensemble",loc:"Dublin",rate:"€550",rating:"4.9",n:63,tags:["Jazz","Swing"],emoji:"🎷",badge:"Popular",bg:"#f0f2f5"},
-  {name:"Éilis Ní Bhriain",type:"Trad Fiddle",loc:"Galway",rate:"€200",rating:"5.0",n:29,tags:["Trad","Céilí"],emoji:"🎵",badge:"Rising Star",bg:"#f5f0f5"},
-  {name:"The Atlantic Rovers",type:"Rock / Folk Band",loc:"Limerick",rate:"€480",rating:"4.7",n:51,tags:["Rock","Folk"],emoji:"🎤",bg:"#f5f0f0"},
-  {name:"Maeve & Collins",type:"Acoustic Duo",loc:"Kilkenny",rate:"€260",rating:"4.8",n:38,tags:["Acoustic","Pop"],emoji:"🎶",bg:"#f0f5f5"},
-  {name:"Padraig Walsh",type:"Irish Ballads Solo",loc:"Kerry",rate:"€150",rating:"4.9",n:18,tags:["Ballads","Solo"],emoji:"🎼",bg:"#f2f5f0"},
-  {name:"The Copper Coast Band",type:"Wedding Band",loc:"Waterford",rate:"€900",rating:"4.8",n:97,tags:["Wedding","Pop"],emoji:"🎹",badge:"Wedding Specialist",bg:"#f5f2f0"},
-];
-
 function rGrid(){
-  document.getElementById('mgrid').innerHTML=ms.map(m=>`
-    <div class="mcard" onclick="go('profile')">
-      <div class="mcard-img" style="background:${m.bg}">
-        <span style="font-size:2.4rem">${m.emoji}</span>
-        ${m.badge?`<div class="mbadge">${m.badge}</div>`:''}
-      </div>
-      <div class="mcard-body">
-        <h3>${m.name}</h3>
-        <div class="mcard-meta">${m.type} · ${m.loc}</div>
-        <div class="mcard-tags">${m.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
-        <div class="mcard-foot"><span class="mrate">${m.rate}/set</span><span class="mstars">★ ${m.rating} (${m.n})</span></div>
-      </div>
-    </div>`).join('');
+  document.getElementById('mgrid').innerHTML=`
+    <div style="grid-column:1/-1;padding:3rem 2rem;text-align:center;color:var(--muted);">
+      <div style="font-size:2rem;margin-bottom:0.75rem">🎵</div>
+      <div style="font-size:0.95rem;font-weight:500;color:var(--text);margin-bottom:0.4rem">No musicians yet</div>
+      <div style="font-size:0.83rem;font-weight:300">Be the first to <a onclick="go('signup')" style="color:var(--lime-text);cursor:pointer;font-weight:500">create a profile</a>.</div>
+    </div>`;
 }
 
 function go(s){
@@ -702,6 +684,24 @@ function setR(el,r){
     if(subText) subText.textContent='Free to join as a musician.';
   }
 }
+async function loadStats(){
+  try {
+    const headers = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact' };
+
+    const mRes = await fetch(SUPA_URL + '/rest/v1/profiles?role=eq.musician&select=id', { headers });
+    const musicians = mRes.headers.get('content-range')?.split('/')[1] || '0';
+
+    const vRes = await fetch(SUPA_URL + '/rest/v1/profiles?role=eq.venue&select=id', { headers });
+    const venues = vRes.headers.get('content-range')?.split('/')[1] || '0';
+
+    document.getElementById('stat-musicians').textContent = musicians;
+    document.getElementById('stat-venues').textContent = venues;
+    document.getElementById('stat-bookings').textContent = '0';
+  } catch(e) {
+    document.getElementById('stat-musicians').textContent = '0';
+    document.getElementById('stat-venues').textContent = '0';
+    document.getElementById('stat-bookings').textContent = '0';
+  }
+}
 </script>
-</body>
 </html>
