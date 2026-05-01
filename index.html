@@ -434,10 +434,10 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
       <div class="topt" onclick="setR(this,'v')">I'm a venue</div>
     </div>
     <div class="frow">
-      <div class="sfg"><label>First name</label><input type="text" placeholder="Siobhán"></div>
-      <div class="sfg"><label>Last name</label><input type="text" placeholder="Murphy"></div>
+      <div class="sfg"><label>First name</label><input id="su-firstname" type="text" placeholder="Siobhán"></div>
+      <div class="sfg"><label>Last name</label><input id="su-lastname" type="text" placeholder="Murphy"></div>
     </div>
-    <div class="sfg"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+    <div class="sfg"><label>Email</label><input id="su-email" type="email" placeholder="you@example.com"></div>
     <div class="sfg" id="an"><label>Act / band name</label><input id="su-actname" type="text" placeholder="e.g. The Reel Sisters"></div>
     <div class="sfg"><label>County</label><select id="su-county"><option>Dublin</option><option>Cork</option><option>Galway</option><option>Limerick</option><option>Kilkenny</option><option>Clare</option><option>Kerry</option><option>Tipperary</option><option>Waterford</option><option>Wexford</option></select></div>
     <div class="sfg" id="travel-group">
@@ -595,10 +595,10 @@ function updateNavForUser() {
 }
 
 async function handleSignup() {
-  const firstName = document.querySelector('#s-signup .frow .sfg:first-child input').value.trim();
-  const lastName = document.querySelector('#s-signup .frow .sfg:last-child input').value.trim();
-  const email = document.querySelector('#s-signup .sfg:nth-child(3) input').value.trim();
-  const actName = document.getElementById('su-actname').value.trim();
+  const firstName = document.getElementById('su-firstname').value.trim();
+  const lastName = document.getElementById('su-lastname').value.trim();
+  const email = document.getElementById('su-email').value.trim();
+  const actName = document.getElementById('su-actname')?.value.trim() || '';
   const county = document.getElementById('su-county').value;
   const genres = [...document.querySelectorAll('#genre-checks .gpill.on')].map(p=>p.dataset.value);
   const travelCounties = [...document.querySelectorAll('#county-checks .gpill.on')].map(p=>p.dataset.value);
@@ -730,12 +730,6 @@ async function handleLogin() {
 
 // Add IDs to signup form fields
 document.addEventListener('DOMContentLoaded', () => {
-  const suWrap = document.querySelector('#s-signup .su-wrap');
-  const inputs = suWrap.querySelectorAll('.frow input');
-  if(inputs[0]) inputs[0].id = 'su-firstname';
-  if(inputs[1]) inputs[1].id = 'su-lastname';
-  const emailInput = suWrap.querySelector('input[type="email"]');
-  if(emailInput) emailInput.id = 'su-email';
   initAuth();
   loadStats();
 });
@@ -807,11 +801,9 @@ async function loadStats(){
 
     document.getElementById('stat-musicians').textContent = musicians;
     document.getElementById('stat-venues').textContent = venues;
-    document.getElementById('stat-bookings').textContent = '0';
   } catch(e) {
     document.getElementById('stat-musicians').textContent = '0';
     document.getElementById('stat-venues').textContent = '0';
-    document.getElementById('stat-bookings').textContent = '0';
   }
 }
 </script>
