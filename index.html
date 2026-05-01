@@ -643,31 +643,41 @@ async function handleSignup() {
     }
 
     // Save session
-    if (data.access_token) {
+    const accessToken = data.access_token || data.session?.access_token;
+    const userId = data.user?.id || data.session?.user?.id;
+
+    if (!userId) {
+      errEl.textContent = 'Signup failed. Please try again.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Create free account →';
+      btn.disabled = false;
+      return;
+    }
+
+    // Save profile using anon key as fallback if no access token yet
+    await fetch(SUPA_URL + '/rest/v1/profiles', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + (accessToken || SUPA_KEY),
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        id: userId,
+        role: currentRole,
+        first_name: firstName,
+        last_name: lastName,
+        act_name: actName,
+        county: document.getElementById('su-county').value,
+        genre: currentRole === 'musician' ? genres : null,
+        travel_counties: currentRole === 'musician' ? travelCounties : null
+      })
+    });
+
+    if (accessToken) {
       currentSession = data;
       localStorage.setItem('sb-session', JSON.stringify(data));
-
-      // Save profile
-      await fetch(SUPA_URL + '/rest/v1/profiles', {
-        method: 'POST',
-        headers: {
-          'apikey': SUPA_KEY,
-          'Authorization': 'Bearer ' + data.access_token,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          id: data.user.id,
-          role: currentRole,
-          first_name: firstName,
-          last_name: lastName,
-          act_name: actName,
-          county,
-          genre: currentRole === 'musician' ? genres : null,
-          travel_counties: currentRole === 'musician' ? travelCounties : null
-        })
-      });
-
       updateNavForUser();
       successEl.textContent = '🎉 Account created! Welcome to Concertigo.';
       successEl.style.display = 'block';
@@ -675,8 +685,6 @@ async function handleSignup() {
       btn.disabled = false;
       setTimeout(() => go('landing'), 1500);
     } else {
-      successEl.textContent = '✅ Check your email to confirm your account!';
-      successEl.style.display = 'block';
       btn.textContent = 'Create free account →';
       btn.disabled = false;
       setTimeout(() => go('check-email'), 800);
