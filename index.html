@@ -440,6 +440,81 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
     <div class="sfg"><label>Email</label><input type="email" placeholder="you@example.com"></div>
     <div class="sfg" id="an"><label>Act / band name</label><input id="su-actname" type="text" placeholder="e.g. The Reel Sisters"></div>
     <div class="sfg"><label>County</label><select id="su-county"><option>Dublin</option><option>Cork</option><option>Galway</option><option>Limerick</option><option>Kilkenny</option><option>Clare</option><option>Kerry</option><option>Tipperary</option><option>Waterford</option><option>Wexford</option></select></div>
+    <div class="sfg" id="travel-group">
+      <label>Counties willing to play in <span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:0.72rem">(select all that apply)</span></label>
+      <div id="county-checks" style="margin-top:8px">
+        <div style="margin-bottom:0.75rem">
+          <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:6px">All Ireland</div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+            <span class="gpill" onclick="toggleAllIreland(this)" data-value="All Ireland">All Ireland</span>
+          </div>
+        </div>
+        <div style="margin-bottom:0.75rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Leinster</div>
+            <span style="font-size:0.67rem;color:var(--lime-text);cursor:pointer;font-weight:600" onclick="toggleProvince(this,'leinster')">Select all</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Dublin">Dublin</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Wicklow">Wicklow</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Wexford">Wexford</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Carlow">Carlow</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Kilkenny">Kilkenny</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Waterford">Waterford</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Kildare">Kildare</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Meath">Meath</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Louth">Louth</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Westmeath">Westmeath</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Offaly">Offaly</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Laois">Laois</span>
+            <span class="gpill county-pill leinster" onclick="togglePill(this)" data-value="Longford">Longford</span>
+          </div>
+        </div>
+        <div style="margin-bottom:0.75rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Munster</div>
+            <span style="font-size:0.67rem;color:var(--lime-text);cursor:pointer;font-weight:600" onclick="toggleProvince(this,'munster')">Select all</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+            <span class="gpill county-pill munster" onclick="togglePill(this)" data-value="Cork">Cork</span>
+            <span class="gpill county-pill munster" onclick="togglePill(this)" data-value="Kerry">Kerry</span>
+            <span class="gpill county-pill munster" onclick="togglePill(this)" data-value="Limerick">Limerick</span>
+            <span class="gpill county-pill munster" onclick="togglePill(this)" data-value="Clare">Clare</span>
+            <span class="gpill county-pill munster" onclick="togglePill(this)" data-value="Tipperary">Tipperary</span>
+          </div>
+        </div>
+        <div style="margin-bottom:0.75rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Connacht</div>
+            <span style="font-size:0.67rem;color:var(--lime-text);cursor:pointer;font-weight:600" onclick="toggleProvince(this,'connacht')">Select all</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+            <span class="gpill county-pill connacht" onclick="togglePill(this)" data-value="Galway">Galway</span>
+            <span class="gpill county-pill connacht" onclick="togglePill(this)" data-value="Mayo">Mayo</span>
+            <span class="gpill county-pill connacht" onclick="togglePill(this)" data-value="Sligo">Sligo</span>
+            <span class="gpill county-pill connacht" onclick="togglePill(this)" data-value="Roscommon">Roscommon</span>
+            <span class="gpill county-pill connacht" onclick="togglePill(this)" data-value="Leitrim">Leitrim</span>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Ulster</div>
+            <span style="font-size:0.67rem;color:var(--lime-text);cursor:pointer;font-weight:600" onclick="toggleProvince(this,'ulster')">Select all</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+            <span class="gpill county-pill ulster" onclick="togglePill(this)" data-value="Donegal">Donegal</span>
+            <span class="gpill county-pill ulster" onclick="togglePill(this)" data-value="Cavan">Cavan</span>
+            <span class="gpill county-pill ulster" onclick="togglePill(this)" data-value="Monaghan">Monaghan</span>
+            <span class="gpill county-pill ulster" onclick="togglePill(this)" data-value="Antrim">Antrim</span>
+            <span class="gpill county-pill ulster" onclick="togglePill(this)" data-value="Armagh">Armagh</span>
+            <span class="gpill county-pill ulster" onclick="togglePill(this)" data-value="Derry">Derry</span>
+            <span class="gpill county-pill ulster" onclick="togglePill(this)" data-value="Down">Down</span>
+            <span class="gpill county-pill ulster" onclick="togglePill(this)" data-value="Fermanagh">Fermanagh</span>
+            <span class="gpill county-pill ulster" onclick="togglePill(this)" data-value="Tyrone">Tyrone</span>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="sfg" id="gn">
       <label>Genres <span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:0.72rem">(select all that apply)</span></label>
       <div id="genre-checks" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:8px">
@@ -526,6 +601,7 @@ async function handleSignup() {
   const actName = document.getElementById('su-actname').value.trim();
   const county = document.getElementById('su-county').value;
   const genres = [...document.querySelectorAll('#genre-checks .gpill.on')].map(p=>p.dataset.value);
+  const travelCounties = [...document.querySelectorAll('#county-checks .gpill.on')].map(p=>p.dataset.value);
   const password = document.getElementById('su-password').value;
   const errEl = document.getElementById('su-error');
   const successEl = document.getElementById('su-success');
@@ -586,7 +662,8 @@ async function handleSignup() {
           last_name: lastName,
           act_name: actName,
           county,
-          genre: currentRole === 'musician' ? genres : null
+          genre: currentRole === 'musician' ? genres : null,
+          travel_counties: currentRole === 'musician' ? travelCounties : null
         })
       });
 
@@ -678,6 +755,20 @@ function go(s){
   window.scrollTo({top:0,behavior:'smooth'});
   if(s==='browse') rGrid();
 }
+function toggleProvince(el, province){
+  const pills = document.querySelectorAll('.county-pill.' + province);
+  const allOn = [...pills].every(p => p.classList.contains('on'));
+  pills.forEach(p => allOn ? p.classList.remove('on') : p.classList.add('on'));
+  el.textContent = allOn ? 'Select all' : 'Deselect all';
+}
+function toggleAllIreland(el){
+  el.classList.toggle('on');
+  const isOn = el.classList.contains('on');
+  document.querySelectorAll('.county-pill').forEach(p=>{
+    if(isOn) p.classList.add('on');
+    else p.classList.remove('on');
+  });
+}
 function togglePill(el){el.classList.toggle('on')}
 function tfc(el){el.classList.toggle('on')}
 function tplay(el){
@@ -694,11 +785,13 @@ function setR(el,r){
     an.querySelector('label').textContent='Venue name';
     an.querySelector('input').placeholder='e.g. The Cobblestone';
     gn.style.display='none';
+    document.getElementById('travel-group').style.display='none';
     if(subText) subText.textContent='€20 one-time signup fee for venues.';
   } else {
     an.querySelector('label').textContent='Act / band name';
     an.querySelector('input').placeholder='e.g. The Reel Sisters';
     gn.style.display='block';
+    document.getElementById('travel-group').style.display='block';
     if(subText) subText.textContent='Free to join as a musician.';
   }
 }
