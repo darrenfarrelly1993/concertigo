@@ -214,7 +214,10 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 .sfg input::placeholder{color:var(--muted2)}
 .sub-btn{width:100%;background:var(--text);color:#fff;border:none;padding:12px;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:opacity 0.15s;margin-top:0.4rem}
 .sub-btn:hover{opacity:0.82}
-.su-foot{text-align:center;font-size:0.81rem;color:var(--muted);margin-top:1.1rem}
+.gpill{border:1px solid var(--border2);color:var(--muted);padding:6px 16px;border-radius:20px;font-size:0.81rem;cursor:pointer;transition:all 0.15s;background:var(--bg);user-select:none}
+.gpill:hover{border-color:var(--text);color:var(--text)}
+.gpill.on{background:var(--text);border-color:var(--text);color:#fff;font-weight:500}
+
 .su-foot a{color:var(--text);cursor:pointer;text-decoration:none;font-weight:600}
 </style>
 </head>
@@ -437,7 +440,21 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
     <div class="sfg"><label>Email</label><input type="email" placeholder="you@example.com"></div>
     <div class="sfg" id="an"><label>Act / band name</label><input id="su-actname" type="text" placeholder="e.g. The Reel Sisters"></div>
     <div class="sfg"><label>County</label><select id="su-county"><option>Dublin</option><option>Cork</option><option>Galway</option><option>Limerick</option><option>Kilkenny</option><option>Clare</option><option>Kerry</option><option>Tipperary</option><option>Waterford</option><option>Wexford</option></select></div>
-    <div class="sfg" id="gn"><label>Primary genre</label><select id="su-genre"><option>Trad / Folk</option><option>Jazz</option><option>Rock / Indie</option><option>Acoustic Solo</option><option>Wedding Band</option><option>Classical</option><option>Blues</option><option>Irish Ballads</option></select></div>
+    <div class="sfg" id="gn">
+      <label>Genres <span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:0.72rem">(select all that apply)</span></label>
+      <div id="genre-checks" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:8px">
+        <span class="gpill" onclick="togglePill(this)" data-value="Trad / Folk">Trad / Folk</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Jazz">Jazz</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Rock / Indie">Rock / Indie</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Wedding Band">Wedding Band</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Acoustic Solo">Acoustic Solo</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Classical">Classical</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Blues">Blues</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Irish Ballads">Irish Ballads</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Country">Country</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Soul / R&B">Soul / R&B</span>
+      </div>
+    </div>
     <div class="sfg"><label>Password</label><input id="su-password" type="password" placeholder="Min 8 characters"></div>
     <div id="su-error" style="color:#c0392b;font-size:0.8rem;margin-bottom:0.5rem;display:none"></div>
     <div id="su-success" style="color:#27ae60;font-size:0.8rem;margin-bottom:0.5rem;display:none"></div>
@@ -508,7 +525,7 @@ async function handleSignup() {
   const email = document.querySelector('#s-signup .sfg:nth-child(3) input').value.trim();
   const actName = document.getElementById('su-actname').value.trim();
   const county = document.getElementById('su-county').value;
-  const genre = document.getElementById('su-genre').value;
+  const genres = [...document.querySelectorAll('#genre-checks .gpill.on')].map(p=>p.dataset.value);
   const password = document.getElementById('su-password').value;
   const errEl = document.getElementById('su-error');
   const successEl = document.getElementById('su-success');
@@ -569,7 +586,7 @@ async function handleSignup() {
           last_name: lastName,
           act_name: actName,
           county,
-          genre: currentRole === 'musician' ? genre : null
+          genre: currentRole === 'musician' ? genres : null
         })
       });
 
@@ -661,6 +678,7 @@ function go(s){
   window.scrollTo({top:0,behavior:'smooth'});
   if(s==='browse') rGrid();
 }
+function togglePill(el){el.classList.toggle('on')}
 function tfc(el){el.classList.toggle('on')}
 function tplay(el){
   document.querySelectorAll('.sample').forEach(s=>s.classList.remove('playing'));
