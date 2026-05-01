@@ -229,6 +229,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
   <div class="nav-links">
     <a onclick="go('browse')">Find Musicians</a>
     <a onclick="go('dash')">For Venues</a>
+    <a onclick="go('login')">Sign In</a>
     <a onclick="go('signup')" class="nav-cta">Join Free</a>
   </div>
 </nav>
@@ -730,6 +731,15 @@ async function handleLogin() {
 
 // Add IDs to signup form fields
 document.addEventListener('DOMContentLoaded', () => {
+  // If redirected back after email confirmation, show login
+  if(window.location.hash.includes('access_token') || window.location.search.includes('type=signup')) {
+    go('login');
+    document.getElementById('li-error').style.display = 'none';
+    const successMsg = document.createElement('div');
+    successMsg.style.cssText = 'color:#27ae60;font-size:0.8rem;margin-bottom:0.5rem';
+    successMsg.textContent = '✅ Email confirmed! Sign in to continue.';
+    document.querySelector('#s-login .su-wrap').insertBefore(successMsg, document.querySelector('#s-login .sfg'));
+  }
   initAuth();
   loadStats();
 });
