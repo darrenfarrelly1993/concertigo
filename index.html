@@ -574,7 +574,54 @@ let currentSession = null;
 let currentRole = 'musician';
 
 // Check for existing session on load
+async function saveProfile(userId, accessToken) {
+  const pending = localStorage.getItem('pending-profile');
+  if (!pending) return;
+  const profile = JSON.parse(pending);
+  await fetch(SUPA_URL + '/rest/v1/profiles', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + accessToken,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({ id: userId, ...profile })
+  });
+  localStorage.removeItem('pending-profile');
+}
+
 async function initAuth() {
+  // Check if redirected back after email confirmation
+  const hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.replace('#', '?'));
+    const accessToken = params.get('access_token');
+    const userId = params.get('user_id') || null;
+
+    if (accessToken) {
+      // Get user details
+      const userRes = await fetch(SUPA_URL + '/auth/v1/user', {
+        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
+      });
+      const userData = await userRes.json();
+      if (userData.id) {
+        currentSession = { access_token: accessToken, user: userData };
+        localStorage.setItem('sb-session', JSON.stringify(currentSession));
+        await saveProfile(userData.id, accessToken);
+        updateNavForUser();
+        // Show login page with success message
+        go('login');
+        const msg = document.createElement('div');
+        msg.style.cssText = 'color:#27ae60;font-size:0.85rem;margin-bottom:1rem;text-align:center';
+        msg.textContent = '✅ Email confirmed! You\'re all set.';
+        document.querySelector('#s-login .su-wrap').insertBefore(msg, document.querySelector('#s-login .toggle-row') || document.querySelector('#s-login .sfg'));
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+  }
+
   const stored = localStorage.getItem('sb-session');
   if (stored) {
     try {
@@ -654,31 +701,23 @@ async function handleSignup() {
       return;
     }
 
-    // Save profile using anon key as fallback if no access token yet
-    await fetch(SUPA_URL + '/rest/v1/profiles', {
-      method: 'POST',
-      headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': 'Bearer ' + (accessToken || SUPA_KEY),
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        id: userId,
-        role: currentRole,
-        first_name: firstName,
-        last_name: lastName,
-        act_name: actName,
-        county: document.getElementById('su-county').value,
-        genre: currentRole === 'musician' ? genres : null,
-        travel_counties: currentRole === 'musician' ? travelCounties : null
-      })
-    });
+    // Store profile data in localStorage to save after confirmation
+    localStorage.setItem('pending-profile', JSON.stringify({
+      role: currentRole,
+      first_name: firstName,
+      last_name: lastName,
+      act_name: actName,
+      county: document.getElementById('su-county').value,
+      genre: currentRole === 'musician' ? genres : null,
+      travel_counties: currentRole === 'musician' ? travelCounties : null
+    }));
 
     if (accessToken) {
       currentSession = data;
       localStorage.setItem('sb-session', JSON.stringify(data));
       updateNavForUser();
+      // Save profile immediately if no confirmation needed
+      await saveProfile(userId, accessToken);
       successEl.textContent = '🎉 Account created! Welcome to Concertigo.';
       successEl.style.display = 'block';
       btn.textContent = 'Create free account →';
@@ -739,15 +778,6 @@ async function handleLogin() {
 
 // Add IDs to signup form fields
 document.addEventListener('DOMContentLoaded', () => {
-  // If redirected back after email confirmation, show login
-  if(window.location.hash.includes('access_token') || window.location.search.includes('type=signup')) {
-    go('login');
-    document.getElementById('li-error').style.display = 'none';
-    const successMsg = document.createElement('div');
-    successMsg.style.cssText = 'color:#27ae60;font-size:0.8rem;margin-bottom:0.5rem';
-    successMsg.textContent = '✅ Email confirmed! Sign in to continue.';
-    document.querySelector('#s-login .su-wrap').insertBefore(successMsg, document.querySelector('#s-login .sfg'));
-  }
   initAuth();
   loadStats();
 });
