@@ -801,13 +801,21 @@ function setR(el,r){
 }
 async function loadStats(){
   try {
-    const headers = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact' };
+    const headers = { 
+      'apikey': SUPA_KEY, 
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'count=exact',
+      'Range': '0-0'
+    };
 
     const mRes = await fetch(SUPA_URL + '/rest/v1/profiles?role=eq.musician&select=id', { headers });
-    const musicians = mRes.headers.get('content-range')?.split('/')[1] || '0';
+    const mRange = mRes.headers.get('content-range');
+    const musicians = mRange ? mRange.split('/')[1] : '0';
 
     const vRes = await fetch(SUPA_URL + '/rest/v1/profiles?role=eq.venue&select=id', { headers });
-    const venues = vRes.headers.get('content-range')?.split('/')[1] || '0';
+    const vRange = vRes.headers.get('content-range');
+    const venues = vRange ? vRange.split('/')[1] : '0';
 
     document.getElementById('stat-musicians').textContent = musicians;
     document.getElementById('stat-venues').textContent = venues;
