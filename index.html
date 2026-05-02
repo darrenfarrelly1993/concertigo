@@ -691,13 +691,22 @@ async function handleSignup() {
 
     // Save session
     const accessToken = data.access_token || data.session?.access_token;
-    const userId = data.user?.id || data.session?.user?.id;
+    const userId = data.user?.id || data.session?.user?.id || data.id;
 
     if (!userId) {
-      errEl.textContent = 'Signup failed. Please try again.';
-      errEl.style.display = 'block';
+      // Signup succeeded but no user ID yet — go to check email
+      localStorage.setItem('pending-profile', JSON.stringify({
+        role: currentRole,
+        first_name: firstName,
+        last_name: lastName,
+        act_name: actName,
+        county: document.getElementById('su-county').value,
+        genre: currentRole === 'musician' ? genres : null,
+        travel_counties: currentRole === 'musician' ? travelCounties : null
+      }));
       btn.textContent = 'Create free account →';
       btn.disabled = false;
+      setTimeout(() => go('check-email'), 800);
       return;
     }
 
