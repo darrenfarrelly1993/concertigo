@@ -1039,12 +1039,14 @@ async function addGig() {
   const date = document.getElementById('gig-date').value;
   if (!venue || !date) { alert('Please enter at least a venue name and date.'); return; }
 
+  const hour = document.getElementById('gig-time-hour').value;
+  const min = document.getElementById('gig-time-min').value;
   const gig = {
     musician_id: userId,
     venue_name: venue,
     location: document.getElementById('gig-location').value.trim(),
     gig_date: date,
-    start_time: document.getElementById('gig-time').value,
+    start_time: hour && min ? `${hour}:${min}` : null,
     description: document.getElementById('gig-desc').value.trim(),
     ticket_url: document.getElementById('gig-ticket').value.trim() || null
   };
@@ -1056,7 +1058,7 @@ async function addGig() {
   });
 
   // Clear fields
-  ['gig-venue','gig-location','gig-date','gig-time','gig-desc','gig-ticket'].forEach(id => document.getElementById(id).value = '');
+  ['gig-venue','gig-location','gig-date','gig-time-hour','gig-time-min','gig-desc','gig-ticket'].forEach(id => document.getElementById(id).value = '');
   loadGigsForEdit(userId, token);
 }
 
@@ -1523,7 +1525,22 @@ async function loadStats(){
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
           <div class="edit-field"><label>Date</label><input id="gig-date" type="date"></div>
-          <div class="edit-field"><label>Start time</label><input id="gig-time" type="time"></div>
+          <div class="edit-field"><label>Start time</label>
+            <div style="display:flex;gap:0.4rem;align-items:center">
+              <select id="gig-time-hour" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text);outline:none">
+                <option value="">HH</option>
+                ${Array.from({length:24},(_,i)=>`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`).join('')}
+              </select>
+              <span style="color:var(--muted);font-weight:600">:</span>
+              <select id="gig-time-min" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text);outline:none">
+                <option value="">MM</option>
+                <option value="00">00</option>
+                <option value="15">15</option>
+                <option value="30">30</option>
+                <option value="45">45</option>
+              </select>
+            </div>
+          </div>
         </div>
         <div class="edit-field"><label>Description</label><input id="gig-desc" type="text" placeholder="e.g. Live acoustic set"></div>
         <div class="edit-field"><label>Ticket URL (optional)</label><input id="gig-ticket" type="url" placeholder="https://..."></div>
