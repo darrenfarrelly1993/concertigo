@@ -84,7 +84,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 .cta-box button:hover{background:var(--text);border-color:var(--text);color:#fff}
 
 /* BROWSE */
-.browse-top{background:var(--bg);border-bottom:1px solid var(--border);padding:2rem 2rem 0}
+.browse-top{background:var(--bg);border-bottom:1px solid var(--border);padding:2rem 2rem 0;max-width:100%}
 .browse-top h2{font-size:1.8rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:0.25rem}
 .browse-top p{color:var(--muted);font-size:0.83rem;margin-bottom:1.4rem}
 .search-row{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.2rem}
@@ -334,6 +334,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
       </select>
       <button class="s-btn" onclick="runSearch()">Search</button>
     </div>
+    <div style="max-width:960px;margin:0 auto">
     <div class="filter-row">
       <span class="fc on" onclick="tfc(this);runSearch()">All genres</span>
       <span class="fc" onclick="tfc(this);runSearch()">Trad / Folk</span>
@@ -348,6 +349,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
       <span class="fc" onclick="tfc(this);runSearch()">Country</span>
       <span class="fc" data-filter="budget" onclick="tfc(this);runSearch()">Under €300</span>
       <span class="fc" data-filter="toprated" onclick="tfc(this);runSearch()">Top rated</span>
+    </div>
     </div>
   </div>
   <div class="browse-body">
