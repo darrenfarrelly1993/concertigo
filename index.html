@@ -218,7 +218,29 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 .gpill:hover{border-color:var(--text);color:var(--text)}
 .gpill.on{background:var(--text);border-color:var(--text);color:#fff;font-weight:500}
 
-.su-foot a{color:var(--text);cursor:pointer;text-decoration:none;font-weight:600}
+/* MY PROFILE */
+.myprof-wrap{max-width:760px;margin:0 auto;padding:2rem}
+.myprof-header{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:2rem;margin-bottom:1.5rem;display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap}
+.myprof-avatar-wrap{position:relative;flex-shrink:0}
+.myprof-avatar{width:90px;height:90px;border-radius:16px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:2.5rem;overflow:hidden;cursor:pointer}
+.myprof-avatar img{width:100%;height:100%;object-fit:cover}
+.myprof-avatar-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45);border-radius:16px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;cursor:pointer;font-size:0.72rem;color:#fff;font-weight:500;letter-spacing:0.03em}
+.myprof-avatar-wrap:hover .myprof-avatar-overlay{opacity:1}
+.myprof-info{flex:1;min-width:200px}
+.myprof-info h2{font-size:1.5rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:4px}
+.myprof-info .msub{font-size:0.83rem;color:var(--muted);margin-bottom:0.75rem}
+.myprof-badges{display:flex;gap:0.4rem;flex-wrap:wrap}
+.myprof-section{background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem;margin-bottom:1rem}
+.myprof-section h3{font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:1rem;font-family:'Syne',sans-serif;font-weight:700}
+.edit-field{margin-bottom:0.85rem}
+.edit-field label{display:block;font-size:0.67rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:5px;font-weight:600}
+.edit-field input,.edit-field textarea,.edit-field select{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text);outline:none;transition:border-color 0.15s}
+.edit-field input:focus,.edit-field textarea:focus,.edit-field select:focus{border-color:var(--text)}
+.edit-field textarea{height:100px;resize:vertical}
+.save-btn{background:var(--text);color:#fff;border:none;padding:11px 24px;border-radius:10px;font-size:0.87rem;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:opacity 0.15s}
+.save-btn:hover{opacity:0.82}
+.save-msg{font-size:0.8rem;color:#27ae60;margin-left:0.75rem;display:none}
+
 </style>
 </head>
 <body>
@@ -634,8 +656,8 @@ async function initAuth() {
 function updateNavForUser() {
   const cta = document.querySelector('.nav-cta');
   if (currentSession) {
-    cta.textContent = 'Dashboard';
-    cta.onclick = () => go('dash');
+    cta.textContent = 'My Profile';
+    cta.onclick = () => go('myprofile');
   } else {
     cta.textContent = 'Join Free';
     cta.onclick = () => go('signup');
@@ -776,7 +798,7 @@ async function handleLogin() {
     updateNavForUser();
     btn.textContent = 'Sign in →';
     btn.disabled = false;
-    go('landing');
+    go('myprofile');
   } catch(e) {
     errEl.textContent = 'Something went wrong. Please try again.';
     errEl.style.display = 'block';
@@ -836,6 +858,7 @@ function go(s){
   document.getElementById('s-'+s).classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
   if(s==='browse') rGrid();
+  if(s==='myprofile') loadMyProfile();
 }
 function toggleProvince(el, province){
   const pills = document.querySelectorAll('.county-pill.' + province);
@@ -877,7 +900,116 @@ function setR(el,r){
     if(subText) subText.textContent='Free to join as a musician.';
   }
 }
-async function loadStats(){
+async function loadMyProfile() {
+  if (!currentSession) { go('login'); return; }
+  const userId = currentSession.user?.id || currentSession.id;
+  try {
+    const res = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=*', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + currentSession.access_token }
+    });
+    const data = await res.json();
+    const p = data[0];
+    if (!p) return;
+
+    document.getElementById('myprof-name').textContent = p.act_name || (p.first_name + ' ' + (p.last_name || ''));
+    document.getElementById('myprof-sub').textContent = (p.county || '') + (p.genre?.length ? ' · ' + p.genre.slice(0,2).join(', ') : '');
+    document.getElementById('myprof-role-badge').textContent = p.role === 'venue' ? 'Venue' : 'Musician';
+    document.getElementById('myprof-county-badge').textContent = p.county || 'Ireland';
+
+    document.getElementById('ep-firstname').value = p.first_name || '';
+    document.getElementById('ep-lastname').value = p.last_name || '';
+    document.getElementById('ep-actname').value = p.act_name || '';
+    document.getElementById('ep-bio').value = p.bio || '';
+    document.getElementById('ep-rate').value = p.rate || '';
+    if (p.county) document.getElementById('ep-county').value = p.county;
+
+    if (p.genre?.length) {
+      document.querySelectorAll('#ep-genre-pills .gpill').forEach(pill => {
+        if (p.genre.includes(pill.dataset.value)) pill.classList.add('on');
+      });
+    }
+
+    if (p.avatar_url) {
+      document.getElementById('myprof-avatar-display').innerHTML = `<img src="${p.avatar_url}" alt="Profile photo">`;
+    }
+
+    if (p.role === 'venue') document.getElementById('ep-genre-section').style.display = 'none';
+  } catch(e) { console.error(e); }
+}
+
+async function saveMyProfile() {
+  if (!currentSession) return;
+  const userId = currentSession.user?.id || currentSession.id;
+  const genres = [...document.querySelectorAll('#ep-genre-pills .gpill.on')].map(p=>p.dataset.value);
+
+  const updates = {
+    first_name: document.getElementById('ep-firstname').value.trim(),
+    last_name: document.getElementById('ep-lastname').value.trim(),
+    act_name: document.getElementById('ep-actname').value.trim(),
+    bio: document.getElementById('ep-bio').value.trim(),
+    rate: document.getElementById('ep-rate').value.trim(),
+    county: document.getElementById('ep-county').value,
+    genre: genres.length ? genres : null
+  };
+
+  try {
+    await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + currentSession.access_token,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(updates)
+    });
+
+    document.getElementById('myprof-name').textContent = updates.act_name || (updates.first_name + ' ' + updates.last_name);
+    document.getElementById('myprof-county-badge').textContent = updates.county;
+    const msg = document.getElementById('save-msg');
+    msg.style.display = 'inline';
+    setTimeout(() => msg.style.display = 'none', 3000);
+  } catch(e) { alert('Could not save. Please try again.'); }
+}
+
+async function uploadAvatar(input) {
+  if (!input.files.length || !currentSession) return;
+  const file = input.files[0];
+  const userId = currentSession.user?.id || currentSession.id;
+  const ext = file.name.split('.').pop();
+  const path = userId + '/avatar.' + ext;
+
+  try {
+    const res = await fetch(SUPA_URL + '/storage/v1/object/avatars/' + path, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + currentSession.access_token,
+        'Content-Type': file.type,
+        'x-upsert': 'true'
+      },
+      body: file
+    });
+
+    if (res.ok) {
+      const avatarUrl = SUPA_URL + '/storage/v1/object/public/avatars/' + path;
+      document.getElementById('myprof-avatar-display').innerHTML = `<img src="${avatarUrl}" alt="Profile photo">`;
+
+      await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + currentSession.access_token,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ avatar_url: avatarUrl })
+      });
+    }
+  } catch(e) { alert('Could not upload photo. Please try again.'); }
+}
+
+
   try {
     const headers = { 
       'apikey': SUPA_KEY, 
@@ -912,6 +1044,75 @@ async function loadStats(){
     <p style="color:var(--muted);font-size:0.9rem;line-height:1.7;margin-bottom:2rem;font-weight:300">We've sent a confirmation link to your email address. Click the link to activate your Concertigo account.</p>
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem;font-size:0.83rem;color:var(--muted);line-height:1.65">
       Can't find it? Check your <strong style="color:var(--text);font-weight:500">spam or junk folder</strong> — it may have landed there.
+    </div>
+  </div>
+</div>
+
+<!-- MY PROFILE -->
+<div id="s-myprofile" class="screen">
+  <div class="myprof-wrap">
+    <div class="myprof-header">
+      <div class="myprof-avatar-wrap">
+        <div class="myprof-avatar" id="myprof-avatar-display" onclick="document.getElementById('avatar-upload').click()">🎵</div>
+        <div class="myprof-avatar-overlay" onclick="document.getElementById('avatar-upload').click()">Change photo</div>
+        <input type="file" id="avatar-upload" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+      </div>
+      <div class="myprof-info">
+        <h2 id="myprof-name">Your Profile</h2>
+        <div class="msub" id="myprof-sub">Loading...</div>
+        <div class="myprof-badges">
+          <span class="pb pb-lime" id="myprof-role-badge">Musician</span>
+          <span class="pb pb-dim" id="myprof-county-badge">Ireland</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="myprof-section">
+      <h3>Basic info</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+        <div class="edit-field"><label>First name</label><input id="ep-firstname" type="text"></div>
+        <div class="edit-field"><label>Last name</label><input id="ep-lastname" type="text"></div>
+      </div>
+      <div class="edit-field"><label>Act / band name</label><input id="ep-actname" type="text" placeholder="e.g. The Reel Sisters"></div>
+      <div class="edit-field"><label>County</label>
+        <select id="ep-county">
+          <option>Dublin</option><option>Cork</option><option>Galway</option><option>Limerick</option>
+          <option>Kilkenny</option><option>Clare</option><option>Kerry</option><option>Tipperary</option>
+          <option>Waterford</option><option>Wexford</option><option>Wicklow</option><option>Meath</option>
+          <option>Kildare</option><option>Louth</option><option>Westmeath</option><option>Offaly</option>
+          <option>Laois</option><option>Longford</option><option>Carlow</option><option>Mayo</option>
+          <option>Sligo</option><option>Roscommon</option><option>Leitrim</option><option>Donegal</option>
+          <option>Cavan</option><option>Monaghan</option><option>Antrim</option><option>Armagh</option>
+          <option>Derry</option><option>Down</option><option>Fermanagh</option><option>Tyrone</option>
+        </select>
+      </div>
+      <div class="edit-field"><label>Rate</label><input id="ep-rate" type="text" placeholder="e.g. €250 per set"></div>
+    </div>
+
+    <div class="myprof-section">
+      <h3>About</h3>
+      <div class="edit-field"><label>Bio</label><textarea id="ep-bio" placeholder="Tell venues about yourself, your style, experience and what makes you unique..."></textarea></div>
+    </div>
+
+    <div class="myprof-section" id="ep-genre-section">
+      <h3>Genres</h3>
+      <div id="ep-genre-pills" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:4px">
+        <span class="gpill" onclick="togglePill(this)" data-value="Trad / Folk">Trad / Folk</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Jazz">Jazz</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Rock / Indie">Rock / Indie</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Wedding Band">Wedding Band</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Acoustic Solo">Acoustic Solo</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Classical">Classical</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Blues">Blues</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Irish Ballads">Irish Ballads</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Country">Country</span>
+        <span class="gpill" onclick="togglePill(this)" data-value="Soul / R&B">Soul / R&B</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;margin-top:0.5rem">
+      <button class="save-btn" onclick="saveMyProfile()">Save profile</button>
+      <span class="save-msg" id="save-msg">✅ Saved!</span>
     </div>
   </div>
 </div>
