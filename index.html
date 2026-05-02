@@ -1093,7 +1093,7 @@ function formatGigDate(dateStr) {
   return { day: d.getDate(), month: d.toLocaleString('en-IE', { month: 'short' }) };
 }
 
-
+function renderDatePills(dates) {
   document.getElementById('ep-dates-list').innerHTML = dates.map(d => `
     <span class="date-pill" data-date="${d}" style="display:inline-flex;align-items:center;gap:6px">
       ${d} <span onclick="removeDate('${d}')" style="cursor:pointer;opacity:0.6;font-size:0.8rem">✕</span>
