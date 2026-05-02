@@ -1518,38 +1518,44 @@ async function loadStats(){
     <div class="myprof-section" id="ep-gigs-section">
       <h3>Upcoming Gigs</h3>
       <div id="ep-gigs-list" style="margin-bottom:0.75rem"></div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
-          <div class="edit-field"><label>Venue name</label><input id="gig-venue" type="text" placeholder="e.g. Whelans"></div>
-          <div class="edit-field"><label>Location</label><input id="gig-location" type="text" placeholder="e.g. Dublin"></div>
+      <div style="border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+        <div style="padding:1rem;background:var(--bg2);border-bottom:1px solid var(--border)">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600">Add a gig</div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
-          <div class="edit-field"><label>Date</label><input id="gig-date" type="date"></div>
-          <div class="edit-field"><label>Start time</label>
-            <div style="display:flex;gap:0.4rem;align-items:center">
-              <select id="gig-time-hour" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text);outline:none">
-                <option value="">HH</option>
-                <option>00</option><option>01</option><option>02</option><option>03</option>
-                <option>04</option><option>05</option><option>06</option><option>07</option>
-                <option>08</option><option>09</option><option>10</option><option>11</option>
-                <option>12</option><option>13</option><option>14</option><option>15</option>
-                <option>16</option><option>17</option><option>18</option><option>19</option>
-                <option>20</option><option>21</option><option>22</option><option>23</option>
-              </select>
-              <span style="color:var(--muted);font-weight:600">:</span>
-              <select id="gig-time-min" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text);outline:none">
-                <option value="">MM</option>
-                <option value="00">00</option>
-                <option value="15">15</option>
-                <option value="30">30</option>
-                <option value="45">45</option>
-              </select>
+        <div style="padding:1rem;display:flex;flex-direction:column;gap:0.75rem">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div class="edit-field"><label>Venue name</label><input id="gig-venue" type="text" placeholder="e.g. Whelans"></div>
+            <div class="edit-field"><label>Location</label><input id="gig-location" type="text" placeholder="e.g. Dublin"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div class="edit-field"><label>Date</label><input id="gig-date" type="date"></div>
+            <div class="edit-field">
+              <label>Start time</label>
+              <div style="display:flex;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+                <select id="gig-time-hour" style="flex:1;border:none;outline:none;background:transparent;padding:10px 8px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text)">
+                  <option value="">HH</option>
+                  <option>00</option><option>01</option><option>02</option><option>03</option>
+                  <option>04</option><option>05</option><option>06</option><option>07</option>
+                  <option>08</option><option>09</option><option>10</option><option>11</option>
+                  <option>12</option><option>13</option><option>14</option><option>15</option>
+                  <option>16</option><option>17</option><option>18</option><option>19</option>
+                  <option>20</option><option>21</option><option>22</option><option>23</option>
+                </select>
+                <span style="color:var(--muted);font-weight:600;padding:0 4px">:</span>
+                <select id="gig-time-min" style="flex:1;border:none;outline:none;background:transparent;padding:10px 8px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text)">
+                  <option value="">MM</option>
+                  <option value="00">00</option>
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="45">45</option>
+                </select>
+              </div>
             </div>
           </div>
+          <div class="edit-field"><label>Description</label><input id="gig-desc" type="text" placeholder="e.g. Live acoustic set"></div>
+          <div class="edit-field"><label>Ticket URL <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label><input id="gig-ticket" type="url" placeholder="https://..."></div>
+          <button onclick="addGig()" style="align-self:flex-start;background:var(--text);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:0.85rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;font-weight:600;transition:opacity 0.15s" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">Add gig →</button>
         </div>
-        <div class="edit-field"><label>Description</label><input id="gig-desc" type="text" placeholder="e.g. Live acoustic set"></div>
-        <div class="edit-field"><label>Ticket URL (optional)</label><input id="gig-ticket" type="url" placeholder="https://..."></div>
-        <button onclick="addGig()" style="background:var(--text);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:0.83rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;font-weight:500;margin-top:0.25rem">Add Gig</button>
       </div>
     </div>
 
