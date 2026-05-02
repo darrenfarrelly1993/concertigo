@@ -1680,10 +1680,11 @@ async function loadConversations() {
   const userId = currentSession.user?.id || currentSession.id;
   const token = currentSession.access_token;
 
-  const res = await fetch(SUPA_URL + '/rest/v1/conversations?or=(participant_1.eq.' + userId + ',participant_2.eq.' + userId + ')&select=*', {
+  const res = await fetch(SUPA_URL + '/rest/v1/conversations?or=(participant_1.eq.' + encodeURIComponent(userId) + ',participant_2.eq.' + encodeURIComponent(userId) + ')&select=*', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token }
   });
   const convs = await res.json();
+  console.log('Conversations:', JSON.stringify(convs));
   const list = document.getElementById('conv-list');
 
   if (!convs.length) {
