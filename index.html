@@ -239,7 +239,10 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 .edit-field textarea{height:100px;resize:vertical}
 .save-btn{background:var(--text);color:#fff;border:none;padding:11px 24px;border-radius:10px;font-size:0.87rem;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:opacity 0.15s}
 .save-btn:hover{opacity:0.82}
-.save-msg{font-size:0.8rem;color:#27ae60;margin-left:0.75rem;display:none}
+.social-link{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border2);color:var(--text);padding:6px 14px;border-radius:20px;font-size:0.8rem;text-decoration:none;transition:all 0.15s}
+.social-link:hover{background:var(--text);color:#fff;border-color:var(--text)}
+.date-pill{background:var(--lime-bg);color:var(--lime-text);padding:5px 14px;border-radius:20px;font-size:0.8rem;font-weight:500}
+
 
 </style>
 </head>
@@ -369,24 +372,17 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
   </div>
   <div class="prof-body">
     <div>
-      <div class="prof-section">
+      <div class="prof-section" id="prof-bio-section">
         <h3>About</h3>
-        <p>Siobhán &amp; The Reel is a Dublin-based traditional Irish trio bringing authentic trad sessions to pubs, festivals, and private events across Leinster and beyond. We specialise in high-energy sets that get people dancing, as well as atmospheric background sessions for dining and events.</p>
-        <p>We've performed at Whelans, The Cobblestone, Electric Picnic, and dozens of county festivals. Fully insured, professional setup, PA available if required.</p>
+        <p id="prof-bio-text" style="font-size:0.87rem;color:var(--muted);line-height:1.75;font-weight:300">No bio yet.</p>
       </div>
-      <div class="prof-section">
-        <h3>Audio samples</h3>
-        <div class="samples">
-          <div class="sample playing" onclick="tplay(this)"><div class="play">▶</div><div class="sinfo"><div class="st">The Morning Dew (Reel medley)</div><div class="sd">3:42</div><div class="sbar"><div class="sbar-fill"></div></div></div></div>
-          <div class="sample" onclick="tplay(this)"><div class="play">▶</div><div class="sinfo"><div class="st">Galway Girl (Session set)</div><div class="sd">4:15</div><div class="sbar"><div class="sbar-fill"></div></div></div></div>
-          <div class="sample" onclick="tplay(this)"><div class="play">▶</div><div class="sinfo"><div class="st">Whiskey in the Jar (Live at Whelans)</div><div class="sd">5:02</div><div class="sbar"><div class="sbar-fill"></div></div></div></div>
-        </div>
+      <div class="prof-section" id="prof-social-section" style="display:none">
+        <h3>Find me online</h3>
+        <div id="prof-social-links" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
       </div>
-      <div class="prof-section">
-        <h3>Reviews</h3>
-        <div class="rev"><div class="rname">Ciarán Murphy ★★★★★</div><div class="rvenue">The Horse &amp; Hound, Kilkenny</div><p>"Absolutely brilliant night. Siobhán and the lads had the whole place up dancing by 10pm. Already rebooked for St. Patrick's weekend."</p></div>
-        <div class="rev"><div class="rname">Aoife Walsh ★★★★★</div><div class="rvenue">The Harbour Hotel, Galway</div><p>"Professional, punctual, and phenomenal. Our guests were blown away. Highly recommend for any venue looking for authentic trad."</p></div>
-        <div class="rev"><div class="rname">Declan O'Brien ★★★★☆</div><div class="rvenue">Mulligan's Bar, Dublin</div><p>"Great set, really engaging with the crowd. Slight delay on setup but nothing major. Would definitely book again."</p></div>
+      <div class="prof-section" id="prof-dates-section" style="display:none">
+        <h3>Available dates</h3>
+        <div id="prof-dates-list" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
       </div>
     </div>
     <div>
@@ -916,6 +912,28 @@ function setR(el,r){
     if(subText) subText.textContent='Free to join as a musician.';
   }
 }
+function renderDatePills(dates) {
+  document.getElementById('ep-dates-list').innerHTML = dates.map(d => `
+    <span class="date-pill" data-date="${d}" style="display:inline-flex;align-items:center;gap:6px">
+      ${d} <span onclick="removeDate('${d}')" style="cursor:pointer;opacity:0.6;font-size:0.8rem">✕</span>
+    </span>`).join('');
+}
+
+function addAvailableDate() {
+  const input = document.getElementById('ep-date-input');
+  const date = input.value;
+  if (!date) return;
+  const existing = [...document.querySelectorAll('#ep-dates-list .date-pill')].map(d => d.dataset.date);
+  if (existing.includes(date)) return;
+  renderDatePills([...existing, date]);
+  input.value = '';
+}
+
+function removeDate(date) {
+  const existing = [...document.querySelectorAll('#ep-dates-list .date-pill')].map(d => d.dataset.date).filter(d => d !== date);
+  renderDatePills(existing);
+}
+
 async function loadMyProfile() {
   if (!currentSession) { go('login'); return; }
   const userId = currentSession.user?.id || currentSession.id;
@@ -938,6 +956,10 @@ async function loadMyProfile() {
     document.getElementById('ep-bio').value = p.bio || '';
     document.getElementById('ep-rate').value = p.rate || '';
     if (p.county) document.getElementById('ep-county').value = p.county;
+    document.getElementById('ep-instagram').value = p.instagram || '';
+    document.getElementById('ep-facebook').value = p.facebook || '';
+    document.getElementById('ep-youtube').value = p.youtube || '';
+    document.getElementById('ep-spotify').value = p.spotify || '';
 
     if (p.genre?.length) {
       document.querySelectorAll('#ep-genre-pills .gpill').forEach(pill => {
@@ -945,11 +967,16 @@ async function loadMyProfile() {
       });
     }
 
+    if (p.available_dates?.length) renderDatePills(p.available_dates);
+
     if (p.avatar_url) {
       document.getElementById('myprof-avatar-display').innerHTML = `<img src="${p.avatar_url}" alt="Profile photo">`;
     }
 
-    if (p.role === 'venue') document.getElementById('ep-genre-section').style.display = 'none';
+    if (p.role === 'venue') {
+      document.getElementById('ep-genre-section').style.display = 'none';
+      document.getElementById('ep-dates-section').style.display = 'none';
+    }
   } catch(e) { console.error(e); }
 }
 
@@ -965,10 +992,18 @@ async function saveMyProfile() {
     bio: document.getElementById('ep-bio').value.trim(),
     rate: document.getElementById('ep-rate').value.trim(),
     county: document.getElementById('ep-county').value,
+    instagram: document.getElementById('ep-instagram').value.trim() || null,
+    facebook: document.getElementById('ep-facebook').value.trim() || null,
+    youtube: document.getElementById('ep-youtube').value.trim() || null,
+    spotify: document.getElementById('ep-spotify').value.trim() || null,
   };
 
   // Only update genre if at least one is selected
   if (genres.length > 0) updates.genre = genres;
+
+  // Save available dates
+  const dates = [...document.querySelectorAll('#ep-dates-list .date-pill')].map(d => d.dataset.date);
+  if (dates.length > 0) updates.available_dates = dates;
 
   try {
     await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
@@ -1070,22 +1105,44 @@ async function loadPublicProfile(id) {
 
     const name = p.act_name || (p.first_name + ' ' + (p.last_name || ''));
 
-    // Update profile header
-    document.querySelector('.prof-av').textContent = p.avatar_url ? '' : '🎵';
-    if (p.avatar_url) document.querySelector('.prof-av').innerHTML = `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
+    // Header
+    const av = document.querySelector('.prof-av');
+    if (p.avatar_url) {
+      av.innerHTML = `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
+    } else {
+      av.textContent = '🎵';
+    }
     document.querySelector('.prof-info h1').textContent = name;
     document.querySelector('.prof-info .psub').textContent = (p.county || 'Ireland') + (p.genre?.length ? ' · ' + p.genre.join(', ') : '');
 
-    // Update about section
-    document.querySelector('#s-profile .prof-section p').textContent = p.bio || 'No bio yet.';
+    // Bio
+    document.getElementById('prof-bio-text').textContent = p.bio || 'No bio yet.';
 
-    // Update booking card price
-    document.querySelector('.bprice').innerHTML = (p.rate || 'Contact for rates') + (p.rate ? ' <span>/ set</span>' : '');
+    // Socials
+    const socials = [];
+    if (p.instagram) socials.push(`<a class="social-link" href="${p.instagram}" target="_blank">📸 Instagram</a>`);
+    if (p.facebook) socials.push(`<a class="social-link" href="${p.facebook}" target="_blank">📘 Facebook</a>`);
+    if (p.youtube) socials.push(`<a class="social-link" href="${p.youtube}" target="_blank">▶️ YouTube</a>`);
+    if (p.spotify) socials.push(`<a class="social-link" href="${p.spotify}" target="_blank">🎵 Spotify</a>`);
+    const socialSection = document.getElementById('prof-social-section');
+    if (socials.length) {
+      document.getElementById('prof-social-links').innerHTML = socials.join('');
+      socialSection.style.display = 'block';
+    } else {
+      socialSection.style.display = 'none';
+    }
 
-    // Update venue name placeholder
-    document.querySelector('.fg input[placeholder]').placeholder = 'e.g. Your venue name';
+    // Available dates
+    const datesSection = document.getElementById('prof-dates-section');
+    if (p.available_dates?.length) {
+      document.getElementById('prof-dates-list').innerHTML = p.available_dates.map(d => `<span class="date-pill">${d}</span>`).join('');
+      datesSection.style.display = 'block';
+    } else {
+      datesSection.style.display = 'none';
+    }
 
-    // Update send enquiry message placeholder
+    // Booking card
+    document.querySelector('.bprice').innerHTML = p.rate ? `${p.rate} <span>/ set</span>` : 'Contact for rates';
     document.querySelector('.fg textarea').placeholder = `Tell ${p.first_name || name} about your venue…`;
 
   } catch(e) { console.error(e); }
@@ -1190,6 +1247,23 @@ async function loadStats(){
         <span class="gpill" onclick="togglePill(this)" data-value="Country">Country</span>
         <span class="gpill" onclick="togglePill(this)" data-value="Soul / R&B">Soul / R&B</span>
       </div>
+    </div>
+
+    <div class="myprof-section">
+      <h3>Social media</h3>
+      <div class="edit-field"><label>Instagram URL</label><input id="ep-instagram" type="url" placeholder="https://instagram.com/yourhandle"></div>
+      <div class="edit-field"><label>Facebook URL</label><input id="ep-facebook" type="url" placeholder="https://facebook.com/yourpage"></div>
+      <div class="edit-field"><label>YouTube URL</label><input id="ep-youtube" type="url" placeholder="https://youtube.com/yourchannel"></div>
+      <div class="edit-field"><label>Spotify URL</label><input id="ep-spotify" type="url" placeholder="https://open.spotify.com/artist/..."></div>
+    </div>
+
+    <div class="myprof-section" id="ep-dates-section">
+      <h3>Available dates <span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:0.72rem">(add dates you're free to perform)</span></h3>
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
+        <input id="ep-date-input" type="date" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text);outline:none">
+        <button onclick="addAvailableDate()" style="background:var(--text);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:0.83rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;font-weight:500">Add</button>
+      </div>
+      <div id="ep-dates-list" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
     </div>
 
     <div style="display:flex;align-items:center;margin-top:0.5rem">
