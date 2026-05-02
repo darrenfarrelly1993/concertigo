@@ -414,6 +414,10 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
           <h3>About</h3>
           <p id="prof-bio-text" style="font-size:0.87rem;color:var(--muted);line-height:1.75;font-weight:300">No bio yet.</p>
         </div>
+        <div class="prof-section" id="prof-travel-section" style="display:none">
+          <h3>Available to play in</h3>
+          <div id="prof-travel-list" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+        </div>
         <div class="prof-section" id="prof-social-section" style="display:none">
           <h3>Find me online</h3>
           <div id="prof-social-links" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
@@ -1389,6 +1393,15 @@ async function loadPublicProfile(id) {
 
     // Bio
     document.getElementById('prof-bio-text').textContent = p.bio || 'No bio yet.';
+
+    // Travel counties
+    const travelSection = document.getElementById('prof-travel-section');
+    if (p.travel_counties?.length) {
+      document.getElementById('prof-travel-list').innerHTML = p.travel_counties.map(c => `<span class="date-pill">${c}</span>`).join('');
+      travelSection.style.display = 'block';
+    } else {
+      travelSection.style.display = 'none';
+    }
 
     // Socials
     const socialIcons = {
