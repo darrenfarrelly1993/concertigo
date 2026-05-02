@@ -239,7 +239,15 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 .edit-field textarea{height:100px;resize:vertical}
 .save-btn{background:var(--text);color:#fff;border:none;padding:11px 24px;border-radius:10px;font-size:0.87rem;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:opacity 0.15s}
 .save-btn:hover{opacity:0.82}
-.social-link{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border2);color:var(--text);padding:8px 16px;border-radius:10px;font-size:0.82rem;text-decoration:none;transition:all 0.15s;background:var(--bg)}
+.gig-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.6rem;display:flex;gap:1rem;align-items:flex-start}
+.gig-date-box{background:var(--text);color:#fff;border-radius:8px;padding:8px 12px;text-align:center;min-width:52px;flex-shrink:0}
+.gig-date-box .day{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;line-height:1}
+.gig-date-box .month{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;opacity:0.75}
+.gig-info h4{font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:3px}
+.gig-info .gig-meta{font-size:0.78rem;color:var(--muted)}
+.gig-ticket{display:inline-block;margin-top:6px;font-size:0.75rem;color:var(--lime-text);font-weight:500;text-decoration:none}
+.gig-ticket:hover{text-decoration:underline}
+align-items:center;gap:8px;border:1px solid var(--border2);color:var(--text);padding:8px 16px;border-radius:10px;font-size:0.82rem;text-decoration:none;transition:all 0.15s;background:var(--bg)}
 .social-link:hover{background:var(--text);color:#fff;border-color:var(--text)}
 .social-link svg{flex-shrink:0}
 .date-pill{background:var(--lime-bg);color:var(--lime-text);padding:5px 14px;border-radius:20px;font-size:0.8rem;font-weight:500}
@@ -377,6 +385,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
     <div class="prof-tabs">
       <div class="ptab on" onclick="switchTab(this,'tab-overview')">Overview</div>
       <div class="ptab" onclick="switchTab(this,'tab-media')">Media</div>
+      <div class="ptab" onclick="switchTab(this,'tab-gigs')">Upcoming Gigs</div>
       <div class="ptab" onclick="switchTab(this,'tab-reviews')">Reviews</div>
     </div>
   </div>
@@ -401,6 +410,13 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
         <div class="prof-section">
           <h3>Media</h3>
           <div id="prof-media-list"><p style="font-size:0.87rem;color:var(--muted);font-weight:300">No media added yet.</p></div>
+        </div>
+      </div>
+
+      <div id="tab-gigs" class="tab-panel" style="display:none">
+        <div class="prof-section">
+          <h3>Upcoming Gigs</h3>
+          <div id="prof-gigs-list"><p style="font-size:0.87rem;color:var(--muted);font-weight:300">No upcoming gigs listed.</p></div>
         </div>
       </div>
 
@@ -1015,7 +1031,69 @@ function switchTab(el, tabId) {
   document.getElementById(tabId).style.display = 'block';
 }
 
-function renderDatePills(dates) {
+async function addGig() {
+  if (!currentSession) return;
+  const userId = currentSession.user?.id || currentSession.id;
+  const token = currentSession.access_token;
+  const venue = document.getElementById('gig-venue').value.trim();
+  const date = document.getElementById('gig-date').value;
+  if (!venue || !date) { alert('Please enter at least a venue name and date.'); return; }
+
+  const gig = {
+    musician_id: userId,
+    venue_name: venue,
+    location: document.getElementById('gig-location').value.trim(),
+    gig_date: date,
+    start_time: document.getElementById('gig-time').value,
+    description: document.getElementById('gig-desc').value.trim(),
+    ticket_url: document.getElementById('gig-ticket').value.trim() || null
+  };
+
+  await fetch(SUPA_URL + '/rest/v1/gigs', {
+    method: 'POST',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify(gig)
+  });
+
+  // Clear fields
+  ['gig-venue','gig-location','gig-date','gig-time','gig-desc','gig-ticket'].forEach(id => document.getElementById(id).value = '');
+  loadGigsForEdit(userId, token);
+}
+
+async function loadGigsForEdit(userId, token) {
+  const res = await fetch(SUPA_URL + '/rest/v1/gigs?musician_id=eq.' + userId + '&gig_date=gte.' + new Date().toISOString().split('T')[0] + '&order=gig_date.asc&select=*', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token }
+  });
+  const gigs = await res.json();
+  const list = document.getElementById('ep-gigs-list');
+  if (!gigs.length) { list.innerHTML = ''; return; }
+  list.innerHTML = gigs.map(g => `
+    <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:0.4rem">
+      <div>
+        <div style="font-size:0.83rem;font-weight:500;color:var(--text)">${g.venue_name} · ${g.location || ''}</div>
+        <div style="font-size:0.75rem;color:var(--muted)">${g.gig_date}${g.start_time ? ' · ' + g.start_time : ''}</div>
+      </div>
+      <span onclick="deleteGig('${g.id}')" style="cursor:pointer;color:var(--muted);font-size:0.8rem">✕</span>
+    </div>`).join('');
+}
+
+async function deleteGig(gigId) {
+  if (!currentSession) return;
+  const token = currentSession.access_token;
+  await fetch(SUPA_URL + '/rest/v1/gigs?id=eq.' + gigId, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token }
+  });
+  const userId = currentSession.user?.id || currentSession.id;
+  loadGigsForEdit(userId, token);
+}
+
+function formatGigDate(dateStr) {
+  const d = new Date(dateStr);
+  return { day: d.getDate(), month: d.toLocaleString('en-IE', { month: 'short' }) };
+}
+
+
   document.getElementById('ep-dates-list').innerHTML = dates.map(d => `
     <span class="date-pill" data-date="${d}" style="display:inline-flex;align-items:center;gap:6px">
       ${d} <span onclick="removeDate('${d}')" style="cursor:pointer;opacity:0.6;font-size:0.8rem">✕</span>
@@ -1072,6 +1150,7 @@ async function loadMyProfile() {
 
     if (p.available_dates?.length) renderDatePills(p.available_dates);
     if (p.media_links?.length) renderMediaLinks(p.media_links);
+    if (p.role === 'musician') loadGigsForEdit(userId, currentSession.access_token);
 
     if (p.avatar_url) {
       document.getElementById('myprof-avatar-display').innerHTML = `<img src="${p.avatar_url}" alt="Profile photo">`;
@@ -1289,8 +1368,27 @@ async function loadPublicProfile(id) {
     } else {
       mediaList.innerHTML = '<p style="font-size:0.87rem;color:var(--muted);font-weight:300">No media added yet.</p>';
     }
-    // Reviews tab
-    const reviewsContainer = document.querySelector('#tab-reviews .prof-section');
+    // Gigs
+    const gigsRes = await fetch(SUPA_URL + '/rest/v1/gigs?musician_id=eq.' + id + '&gig_date=gte.' + new Date().toISOString().split('T')[0] + '&order=gig_date.asc&select=*', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    const gigs = await gigsRes.json();
+    const gigsList = document.getElementById('prof-gigs-list');
+    if (gigs.length) {
+      gigsList.innerHTML = gigs.map(g => {
+        const {day, month} = formatGigDate(g.gig_date);
+        return `<div class="gig-card">
+          <div class="gig-date-box"><div class="day">${day}</div><div class="month">${month}</div></div>
+          <div class="gig-info">
+            <h4>${g.venue_name}${g.location ? ' · ' + g.location : ''}</h4>
+            <div class="gig-meta">${g.start_time || ''}${g.description ? ' · ' + g.description : ''}</div>
+            ${g.ticket_url ? `<a class="gig-ticket" href="${g.ticket_url}" target="_blank">🎟 Get tickets →</a>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      gigsList.innerHTML = '<p style="font-size:0.87rem;color:var(--muted);font-weight:300">No upcoming gigs listed.</p>';
+    }
     if (reviews.length) {
       reviewsContainer.innerHTML = `<h3>Reviews</h3>` + reviews.map(r => `
         <div class="rev">
@@ -1412,6 +1510,24 @@ async function loadStats(){
         <span class="gpill" onclick="togglePill(this)" data-value="Irish Ballads">Irish Ballads</span>
         <span class="gpill" onclick="togglePill(this)" data-value="Country">Country</span>
         <span class="gpill" onclick="togglePill(this)" data-value="Soul / R&B">Soul / R&B</span>
+      </div>
+    </div>
+
+    <div class="myprof-section" id="ep-gigs-section">
+      <h3>Upcoming Gigs</h3>
+      <div id="ep-gigs-list" style="margin-bottom:0.75rem"></div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
+          <div class="edit-field"><label>Venue name</label><input id="gig-venue" type="text" placeholder="e.g. Whelans"></div>
+          <div class="edit-field"><label>Location</label><input id="gig-location" type="text" placeholder="e.g. Dublin"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
+          <div class="edit-field"><label>Date</label><input id="gig-date" type="date"></div>
+          <div class="edit-field"><label>Start time</label><input id="gig-time" type="time"></div>
+        </div>
+        <div class="edit-field"><label>Description</label><input id="gig-desc" type="text" placeholder="e.g. Live acoustic set"></div>
+        <div class="edit-field"><label>Ticket URL (optional)</label><input id="gig-ticket" type="url" placeholder="https://..."></div>
+        <button onclick="addGig()" style="background:var(--text);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:0.83rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;font-weight:500;margin-top:0.25rem">Add Gig</button>
       </div>
     </div>
 
