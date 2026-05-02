@@ -325,22 +325,22 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
     <h2>Find musicians</h2>
     <p>Musicians available across Ireland</p>
     <div class="search-row">
-      <input class="s-input" type="text" placeholder="Search by name, genre or keyword…">
-      <select class="s-sel">
-        <option>All Ireland</option><option>Dublin</option><option>Cork</option>
+      <input id="search-input" class="s-input" type="text" placeholder="Search by name, genre or keyword…">
+      <select id="search-county" class="s-sel">
+        <option value="">All Ireland</option><option>Dublin</option><option>Cork</option>
         <option>Galway</option><option>Limerick</option><option>Kilkenny</option>
+        <option>Clare</option><option>Kerry</option><option>Tipperary</option>
+        <option>Waterford</option><option>Wexford</option>
       </select>
-      <button class="s-btn">Search</button>
+      <button class="s-btn" onclick="runSearch()">Search</button>
     </div>
     <div class="filter-row">
-      <span class="fc on" onclick="tfc(this)">All genres</span>
-      <span class="fc" onclick="tfc(this)">Trad / Folk</span>
-      <span class="fc" onclick="tfc(this)">Jazz</span>
-      <span class="fc" onclick="tfc(this)">Rock</span>
-      <span class="fc" onclick="tfc(this)">Acoustic</span>
-      <span class="fc" onclick="tfc(this)">Wedding</span>
-      <span class="fc" onclick="tfc(this)">Under €300</span>
-      <span class="fc" onclick="tfc(this)">Top rated</span>
+      <span class="fc on" onclick="tfc(this);runSearch()">All genres</span>
+      <span class="fc" onclick="tfc(this);runSearch()">Trad / Folk</span>
+      <span class="fc" onclick="tfc(this);runSearch()">Jazz</span>
+      <span class="fc" onclick="tfc(this);runSearch()">Rock</span>
+      <span class="fc" onclick="tfc(this);runSearch()">Acoustic</span>
+      <span class="fc" onclick="tfc(this);runSearch()">Wedding</span>
     </div>
   </div>
   <div class="browse-body">
@@ -824,7 +824,73 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStats();
 });
 
-async function rGrid(){
+async function runSearch() {
+  const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+  const county = document.getElementById('search-county').value;
+  const activeGenres = [...document.querySelectorAll('.filter-row .fc.on')]
+    .map(el => el.textContent.trim())
+    .filter(g => g !== 'All genres');
+
+  const grid = document.getElementById('mgrid');
+  grid.innerHTML = `<div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);font-size:0.85rem">Searching...</div>`;
+
+  try {
+    let url = SUPA_URL + '/rest/v1/profiles?role=eq.musician&select=*';
+    if (county) url += `&county=eq.${encodeURIComponent(county)}`;
+
+    const res = await fetch(url, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    let musicians = await res.json();
+
+    // Filter by keyword client-side
+    if (keyword) {
+      musicians = musicians.filter(m => {
+        const name = (m.act_name || m.first_name + ' ' + m.last_name || '').toLowerCase();
+        const bio = (m.bio || '').toLowerCase();
+        const genres = (m.genre || []).join(' ').toLowerCase();
+        return name.includes(keyword) || bio.includes(keyword) || genres.includes(keyword);
+      });
+    }
+
+    // Filter by active genre pills
+    if (activeGenres.length) {
+      musicians = musicians.filter(m =>
+        activeGenres.some(g => (m.genre || []).some(mg => mg.toLowerCase().includes(g.toLowerCase())))
+      );
+    }
+
+    document.querySelector('.results-meta').textContent = `Showing ${musicians.length} musician${musicians.length !== 1 ? 's' : ''}`;
+
+    if (!musicians.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;padding:3rem 2rem;text-align:center;color:var(--muted);">
+        <div style="font-size:2rem;margin-bottom:0.75rem">🎵</div>
+        <div style="font-size:0.95rem;font-weight:500;color:var(--text);margin-bottom:0.4rem">No musicians found</div>
+        <div style="font-size:0.83rem;font-weight:300">Try adjusting your search or filters.</div>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = musicians.map(m => `
+      <div class="mcard" onclick="loadPublicProfile('${m.id}')">
+        <div class="mcard-img" style="background:#f0f5f2;overflow:hidden">
+          ${m.avatar_url ? `<img src="${m.avatar_url}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:2.4rem">🎵</span>`}
+          ${m.county ? `<div class="mbadge">${m.county}</div>` : ''}
+        </div>
+        <div class="mcard-body">
+          <h3>${m.act_name || m.first_name + ' ' + (m.last_name || '')}</h3>
+          <div class="mcard-meta">${m.county || 'Ireland'}</div>
+          <div class="mcard-tags">${(m.genre || []).map(g=>`<span class="tag">${g}</span>`).join('')}</div>
+          <div class="mcard-foot"><span class="mrate">${m.rate || 'Contact for rates'}</span></div>
+        </div>
+      </div>`).join('');
+
+  } catch(e) {
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted)">Could not load results. Please try again.</div>`;
+  }
+}
+
+async function rGrid(){ await runSearch(); }
   const grid = document.getElementById('mgrid');
   grid.innerHTML = `<div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);font-size:0.85rem">Loading...</div>`;
 
@@ -888,7 +954,18 @@ function toggleAllIreland(el){
   });
 }
 function togglePill(el){el.classList.toggle('on')}
-function tfc(el){el.classList.toggle('on')}
+function tfc(el){
+  if(el.textContent.trim() === 'All genres') {
+    document.querySelectorAll('.filter-row .fc').forEach(f => f.classList.remove('on'));
+    el.classList.add('on');
+  } else {
+    document.querySelector('.filter-row .fc').classList.remove('on');
+    el.classList.toggle('on');
+    if(!document.querySelectorAll('.filter-row .fc.on').length) {
+      document.querySelector('.filter-row .fc').classList.add('on');
+    }
+  }
+}
 function tplay(el){
   document.querySelectorAll('.sample').forEach(s=>s.classList.remove('playing'));
   el.classList.add('playing');
