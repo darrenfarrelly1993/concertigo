@@ -980,15 +980,23 @@ async function uploadAvatar(input) {
   if (!input.files.length || !currentSession) return;
   const file = input.files[0];
   const userId = currentSession.user?.id || currentSession.id;
-  const ext = file.name.split('.').pop();
+  if (!userId) { alert('Please log in again to upload a photo.'); return; }
+  const ext = file.name.split('.').pop().toLowerCase();
   const path = userId + '/avatar.' + ext;
+  const token = currentSession.access_token || currentSession.session?.access_token;
 
   try {
+    // Try DELETE first in case file exists (upsert workaround)
+    await fetch(SUPA_URL + '/storage/v1/object/avatars/' + path, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token }
+    });
+
     const res = await fetch(SUPA_URL + '/storage/v1/object/avatars/' + path, {
       method: 'POST',
       headers: {
         'apikey': SUPA_KEY,
-        'Authorization': 'Bearer ' + currentSession.access_token,
+        'Authorization': 'Bearer ' + token,
         'Content-Type': file.type,
         'x-upsert': 'true'
       },
@@ -996,21 +1004,28 @@ async function uploadAvatar(input) {
     });
 
     if (res.ok) {
-      const avatarUrl = SUPA_URL + '/storage/v1/object/public/avatars/' + path;
+      const avatarUrl = SUPA_URL + '/storage/v1/object/public/avatars/' + path + '?t=' + Date.now();
       document.getElementById('myprof-avatar-display').innerHTML = `<img src="${avatarUrl}" alt="Profile photo">`;
 
       await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
         method: 'PATCH',
         headers: {
           'apikey': SUPA_KEY,
-          'Authorization': 'Bearer ' + currentSession.access_token,
+          'Authorization': 'Bearer ' + token,
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         },
         body: JSON.stringify({ avatar_url: avatarUrl })
       });
+    } else {
+      const err = await res.json();
+      console.error('Upload error:', err);
+      alert('Upload failed: ' + (err.message || err.error || 'Unknown error'));
     }
-  } catch(e) { alert('Could not upload photo. Please try again.'); }
+  } catch(e) { 
+    console.error(e);
+    alert('Could not upload photo. Please try again.'); 
+  }
 }
 
 async function loadStats(){
