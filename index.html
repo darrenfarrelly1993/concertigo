@@ -1453,6 +1453,7 @@ async function loadPublicProfile(id) {
     } else {
       gigsList.innerHTML = '<p style="font-size:0.87rem;color:var(--muted);font-weight:300">No upcoming gigs listed.</p>';
     }
+    const reviewsContainer = document.querySelector('#tab-reviews .prof-section');
     if (reviews.length) {
       reviewsContainer.innerHTML = `<h3>Reviews</h3>` + reviews.map(r => `
         <div class="rev">
