@@ -951,8 +951,10 @@ async function saveMyProfile() {
     bio: document.getElementById('ep-bio').value.trim(),
     rate: document.getElementById('ep-rate').value.trim(),
     county: document.getElementById('ep-county').value,
-    genre: genres.length ? genres : null
   };
+
+  // Only update genre if at least one is selected
+  if (genres.length > 0) updates.genre = genres;
 
   try {
     await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
