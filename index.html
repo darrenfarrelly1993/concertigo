@@ -252,6 +252,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
     <a onclick="go('browse')">Find Musicians</a>
     <a onclick="go('dash')">For Venues</a>
     <a id="nav-signin" onclick="go('login')">Sign In</a>
+    <a id="nav-signout" style="display:none" onclick="signOut()">Sign Out</a>
     <a onclick="go('signup')" class="nav-cta">Join Free</a>
   </div>
 </nav>
@@ -656,15 +657,25 @@ async function initAuth() {
 function updateNavForUser() {
   const cta = document.querySelector('.nav-cta');
   const signInLink = document.getElementById('nav-signin');
+  const signOutLink = document.getElementById('nav-signout');
   if (currentSession) {
     cta.textContent = 'My Profile';
     cta.onclick = () => go('myprofile');
     if (signInLink) signInLink.style.display = 'none';
+    if (signOutLink) signOutLink.style.display = '';
   } else {
     cta.textContent = 'Join Free';
     cta.onclick = () => go('signup');
     if (signInLink) signInLink.style.display = '';
+    if (signOutLink) signOutLink.style.display = 'none';
   }
+}
+
+function signOut() {
+  currentSession = null;
+  localStorage.removeItem('sb-session');
+  updateNavForUser();
+  go('landing');
 }
 
 async function handleSignup() {
