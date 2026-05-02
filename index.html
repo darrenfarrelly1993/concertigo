@@ -837,15 +837,17 @@ async function rGrid(){
 
     grid.innerHTML = musicians.map(m => `
       <div class="mcard" onclick="go('profile')">
-        <div class="mcard-img" style="background:#f0f5f2">
-          <span style="font-size:2.4rem">🎵</span>
-          ${m.role === 'musician' && m.act_name ? `<div class="mbadge">${m.county || ''}</div>` : ''}
+        <div class="mcard-img" style="background:#f0f5f2;overflow:hidden">
+          ${m.avatar_url 
+            ? `<img src="${m.avatar_url}" style="width:100%;height:100%;object-fit:cover">` 
+            : `<span style="font-size:2.4rem">🎵</span>`}
+          ${m.county ? `<div class="mbadge">${m.county}</div>` : ''}
         </div>
         <div class="mcard-body">
           <h3>${m.act_name || m.first_name + ' ' + (m.last_name || '')}</h3>
           <div class="mcard-meta">${m.county || 'Ireland'}</div>
           <div class="mcard-tags">${(m.genre || []).slice(0,2).map(g=>`<span class="tag">${g}</span>`).join('')}</div>
-          <div class="mcard-foot"><span class="mrate">Contact for rates</span><span class="mstars"></span></div>
+          <div class="mcard-foot"><span class="mrate">${m.rate || 'Contact for rates'}</span><span class="mstars"></span></div>
         </div>
       </div>`).join('');
   } catch(e) {
