@@ -1200,13 +1200,15 @@ function removeDate(date) {
 async function loadMyProfile() {
   if (!currentSession) { go('login'); return; }
   const userId = currentSession.user?.id || currentSession.id;
+  console.log('Loading profile for userId:', userId);
   try {
     const res = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=*', {
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + currentSession.access_token }
     });
     const data = await res.json();
+    console.log('Profile response:', JSON.stringify(data));
     const p = data[0];
-    if (!p) return;
+    if (!p) { console.log('No profile found for userId:', userId); return; }
 
     document.getElementById('myprof-name').textContent = p.act_name || (p.first_name + ' ' + (p.last_name || ''));
     document.getElementById('myprof-sub').textContent = (p.county || '') + (p.genre?.length ? ' · ' + p.genre.slice(0,2).join(', ') : '');
