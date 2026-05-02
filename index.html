@@ -239,7 +239,16 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 .edit-field textarea{height:100px;resize:vertical}
 .save-btn{background:var(--text);color:#fff;border:none;padding:11px 24px;border-radius:10px;font-size:0.87rem;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:opacity 0.15s}
 .save-btn:hover{opacity:0.82}
-.gig-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.6rem;display:flex;gap:1rem;align-items:flex-start}
+.custom-select{position:relative}
+.cs-trigger{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--muted);cursor:pointer;user-select:none;transition:border-color 0.15s}
+.cs-trigger:hover{border-color:var(--border2)}
+.cs-trigger.active{border-color:var(--text);color:var(--text)}
+.cs-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:200;display:none;max-height:200px;overflow-y:auto}
+.cs-dropdown.open{display:block}
+.cs-option{padding:8px 12px;font-size:0.87rem;color:var(--text);cursor:pointer;transition:background 0.1s}
+.cs-option:hover{background:var(--bg2)}
+.cs-option.selected{color:var(--lime-text);font-weight:500}
+background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.6rem;display:flex;gap:1rem;align-items:flex-start}
 .gig-date-box{background:var(--text);color:#fff;border-radius:8px;padding:8px 12px;text-align:center;min-width:52px;flex-shrink:0}
 .gig-date-box .day{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;line-height:1}
 .gig-date-box .month{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;opacity:0.75}
@@ -1031,6 +1040,47 @@ function switchTab(el, tabId) {
   document.getElementById(tabId).style.display = 'block';
 }
 
+function toggleCS(trigger) {
+  const dropdown = trigger.nextElementSibling;
+  const isOpen = dropdown.classList.contains('open');
+  // Close all dropdowns
+  document.querySelectorAll('.cs-dropdown').forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('.cs-trigger').forEach(t => t.classList.remove('active'));
+  if (!isOpen) {
+    dropdown.classList.add('open');
+    trigger.classList.add('active');
+  }
+}
+
+function selectCS(triggerId, dropdownId, option, hiddenId) {
+  const val = option.textContent.trim();
+  const trigger = document.getElementById(triggerId);
+  const dropdown = document.getElementById(dropdownId);
+  const hidden = document.getElementById(hiddenId);
+  // Clear previous selection
+  dropdown.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'));
+  if (val === 'HH' || val === 'MM') {
+    trigger.textContent = val;
+    trigger.style.color = 'var(--muted)';
+    hidden.value = '';
+  } else {
+    option.classList.add('selected');
+    trigger.textContent = val;
+    trigger.style.color = 'var(--text)';
+    hidden.value = val;
+  }
+  dropdown.classList.remove('open');
+  trigger.classList.remove('active');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.custom-select')) {
+    document.querySelectorAll('.cs-dropdown').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.cs-trigger').forEach(t => t.classList.remove('active'));
+  }
+});
+
 async function addGig() {
   if (!currentSession) return;
   const userId = currentSession.user?.id || currentSession.id;
@@ -1059,6 +1109,10 @@ async function addGig() {
 
   // Clear fields
   ['gig-venue','gig-location','gig-date','gig-time-hour','gig-time-min','gig-desc','gig-ticket'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('cs-hour-trigger').textContent = 'HH';
+  document.getElementById('cs-hour-trigger').style.color = 'var(--muted)';
+  document.getElementById('cs-min-trigger').textContent = 'MM';
+  document.getElementById('cs-min-trigger').style.color = 'var(--muted)';
   loadGigsForEdit(userId, token);
 }
 
@@ -1531,24 +1585,50 @@ async function loadStats(){
             <div class="edit-field"><label>Date</label><input id="gig-date" type="date"></div>
             <div class="edit-field">
               <label>Start time</label>
-              <div style="display:flex;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden">
-                <select id="gig-time-hour" style="flex:1;border:none;outline:none;background:transparent;padding:10px 8px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text)">
-                  <option value="">HH</option>
-                  <option>00</option><option>01</option><option>02</option><option>03</option>
-                  <option>04</option><option>05</option><option>06</option><option>07</option>
-                  <option>08</option><option>09</option><option>10</option><option>11</option>
-                  <option>12</option><option>13</option><option>14</option><option>15</option>
-                  <option>16</option><option>17</option><option>18</option><option>19</option>
-                  <option>20</option><option>21</option><option>22</option><option>23</option>
-                </select>
-                <span style="color:var(--muted);font-weight:600;padding:0 4px">:</span>
-                <select id="gig-time-min" style="flex:1;border:none;outline:none;background:transparent;padding:10px 8px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text)">
-                  <option value="">MM</option>
-                  <option value="00">00</option>
-                  <option value="15">15</option>
-                  <option value="30">30</option>
-                  <option value="45">45</option>
-                </select>
+              <div style="display:flex;align-items:center;gap:4px">
+                <div class="custom-select" style="flex:1">
+                  <div class="cs-trigger" onclick="toggleCS(this)" id="cs-hour-trigger">HH</div>
+                  <div class="cs-dropdown" id="cs-hour-dropdown">
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">HH</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">00</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">01</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">02</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">03</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">04</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">05</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">06</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">07</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">08</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">09</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">10</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">11</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">12</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">13</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">14</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">15</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">16</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">17</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">18</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">19</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">20</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">21</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">22</div>
+                    <div class="cs-option" onclick="selectCS('cs-hour-trigger','cs-hour-dropdown',this,'gig-time-hour')">23</div>
+                  </div>
+                  <input type="hidden" id="gig-time-hour">
+                </div>
+                <span style="color:var(--muted);font-weight:600">:</span>
+                <div class="custom-select" style="flex:1">
+                  <div class="cs-trigger" onclick="toggleCS(this)" id="cs-min-trigger">MM</div>
+                  <div class="cs-dropdown" id="cs-min-dropdown">
+                    <div class="cs-option" onclick="selectCS('cs-min-trigger','cs-min-dropdown',this,'gig-time-min')">MM</div>
+                    <div class="cs-option" onclick="selectCS('cs-min-trigger','cs-min-dropdown',this,'gig-time-min')">00</div>
+                    <div class="cs-option" onclick="selectCS('cs-min-trigger','cs-min-dropdown',this,'gig-time-min')">15</div>
+                    <div class="cs-option" onclick="selectCS('cs-min-trigger','cs-min-dropdown',this,'gig-time-min')">30</div>
+                    <div class="cs-option" onclick="selectCS('cs-min-trigger','cs-min-dropdown',this,'gig-time-min')">45</div>
+                  </div>
+                  <input type="hidden" id="gig-time-min">
+                </div>
               </div>
             </div>
           </div>
