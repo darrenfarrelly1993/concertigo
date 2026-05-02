@@ -742,15 +742,15 @@ async function saveProfile(userId, accessToken) {
   const pending = localStorage.getItem('pending-profile');
   if (!pending) return;
   const profile = JSON.parse(pending);
-  await fetch(SUPA_URL + '/rest/v1/profiles', {
-    method: 'POST',
+  await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
+    method: 'PATCH',
     headers: {
       'apikey': SUPA_KEY,
       'Authorization': 'Bearer ' + accessToken,
       'Content-Type': 'application/json',
       'Prefer': 'return=minimal'
     },
-    body: JSON.stringify({ id: userId, ...profile })
+    body: JSON.stringify(profile)
   });
   localStorage.removeItem('pending-profile');
 }
@@ -874,24 +874,14 @@ async function handleSignup() {
     const userId = data.user?.id || data.session?.user?.id || data.id;
 
     if (!userId) {
-      // Signup succeeded but no user ID yet — go to check email
-      localStorage.setItem('pending-profile', JSON.stringify({
-        role: currentRole,
-        first_name: firstName,
-        last_name: lastName,
-        act_name: actName,
-        county: document.getElementById('su-county').value,
-        genre: currentRole === 'musician' ? genres : null,
-        travel_counties: currentRole === 'musician' ? travelCounties : null
-      }));
       btn.textContent = 'Create free account →';
       btn.disabled = false;
       setTimeout(() => go('check-email'), 800);
       return;
     }
 
-    // Store profile data in localStorage to save after confirmation
-    localStorage.setItem('pending-profile', JSON.stringify({
+    // Save profile data immediately using PATCH (trigger already created the row)
+    const profileData = {
       role: currentRole,
       first_name: firstName,
       last_name: lastName,
@@ -899,14 +889,23 @@ async function handleSignup() {
       county: document.getElementById('su-county').value,
       genre: currentRole === 'musician' ? genres : null,
       travel_counties: currentRole === 'musician' ? travelCounties : null
-    }));
+    };
+
+    await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + (accessToken || SUPA_KEY),
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(profileData)
+    });
 
     if (accessToken) {
       currentSession = data;
       localStorage.setItem('sb-session', JSON.stringify(data));
       updateNavForUser();
-      // Save profile immediately if no confirmation needed
-      await saveProfile(userId, accessToken);
       successEl.textContent = '🎉 Account created! Welcome to Concertigo.';
       successEl.style.display = 'block';
       btn.textContent = 'Create free account →';
@@ -1782,10 +1781,10 @@ async function sendMessage() {
 }
 
 function subscribeToMessages(convId) {
-  // Unsubscribe from previous channel
-  if (realtimeChannel) realtimeChannel.unsubscribe();
+  // Clear previous polling interval
+  if (realtimeChannel) clearInterval(realtimeChannel);
 
-  // Poll every 3 seconds for new messages (simple realtime)
+  // Poll every 3 seconds for new messages
   realtimeChannel = setInterval(async () => {
     if (currentConvId === convId) await loadMessages(convId);
   }, 3000);
