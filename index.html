@@ -1057,7 +1057,7 @@ async function loadMyProfile() {
     document.getElementById('ep-lastname').value = p.last_name || '';
     document.getElementById('ep-actname').value = p.act_name || '';
     document.getElementById('ep-bio').value = p.bio || '';
-    document.getElementById('ep-rate').value = p.rate || '';
+    document.getElementById('ep-rate').value = p.rate ? p.rate.replace(/[^0-9]/g, '') : '';
     if (p.county) document.getElementById('ep-county').value = p.county;
     document.getElementById('ep-instagram').value = p.instagram || '';
     document.getElementById('ep-facebook').value = p.facebook || '';
@@ -1094,7 +1094,7 @@ async function saveMyProfile() {
     last_name: document.getElementById('ep-lastname').value.trim(),
     act_name: document.getElementById('ep-actname').value.trim(),
     bio: document.getElementById('ep-bio').value.trim(),
-    rate: document.getElementById('ep-rate').value.trim(),
+    rate: document.getElementById('ep-rate').value ? '€' + document.getElementById('ep-rate').value : '',
     county: document.getElementById('ep-county').value,
     instagram: document.getElementById('ep-instagram').value.trim() || null,
     facebook: document.getElementById('ep-facebook').value.trim() || null,
@@ -1356,7 +1356,14 @@ async function loadStats(){
           <option>Derry</option><option>Down</option><option>Fermanagh</option><option>Tyrone</option>
         </select>
       </div>
-      <div class="edit-field"><label>Rate</label><input id="ep-rate" type="text" placeholder="e.g. €250 per set"></div>
+      <div class="edit-field">
+        <label>Rate per set</label>
+        <div style="display:flex;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color 0.15s" onfocusin="this.style.borderColor='var(--text)'" onfocusout="this.style.borderColor='var(--border)'">
+          <span style="padding:0 12px;font-size:0.87rem;color:var(--muted);border-right:1px solid var(--border);height:100%;display:flex;align-items:center;background:var(--bg3)">€</span>
+          <input id="ep-rate" type="number" min="0" step="1" placeholder="250" style="flex:1;border:none;outline:none;background:transparent;padding:10px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text)">
+          <span style="padding:0 12px;font-size:0.83rem;color:var(--muted);border-left:1px solid var(--border);height:100%;display:flex;align-items:center;background:var(--bg3)">/set</span>
+        </div>
+      </div>
     </div>
 
     <div class="myprof-section">
