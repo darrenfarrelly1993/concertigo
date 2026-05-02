@@ -454,14 +454,19 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
     </div>
     <div>
       <div class="book-card">
-        <div class="bprice" id="prof-rate">€350 <span>/ 2hr set</span></div>
-        <div class="fg"><label>Event date</label><input type="date"></div>
-        <div class="fg"><label>Event type</label><select><option>Pub session</option><option>Private event</option><option>Wedding</option><option>Festival</option><option>Corporate</option></select></div>
-        <div class="fg"><label>Venue name</label><input type="text" placeholder="e.g. The Cobblestone"></div>
-        <div class="fg"><label>Message</label><textarea id="prof-message" placeholder="Tell them about your venue…"></textarea></div>
-        <button id="prof-message-btn" class="send-btn" onclick="alert('Enquiry sent!')">Send enquiry →</button>
-        <button id="prof-chat-btn" class="btn-g" style="width:100%;margin-bottom:0.5rem;display:none" onclick="">💬 Message directly</button>
-        <div class="book-note">Free to enquire · No payment now</div>
+        <div class="bprice" id="prof-rate">Contact for rates</div>
+        <div id="prof-action-wrap" style="margin-top:1.2rem">
+          <div id="prof-logged-out" style="text-align:center;padding:1rem;background:var(--bg2);border-radius:10px;border:1px solid var(--border)">
+            <p style="font-size:0.83rem;color:var(--muted);margin-bottom:0.75rem">Sign in to message this musician</p>
+            <button class="btn-p" style="width:100%;font-size:0.85rem" onclick="go('login')">Sign in</button>
+          </div>
+          <button id="prof-chat-btn" class="send-btn" style="display:none;width:100%" onclick="">
+            <span style="display:flex;align-items:center;justify-content:center;gap:8px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              Message
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1406,20 +1411,21 @@ async function loadPublicProfile(id) {
       travelSection.style.display = 'none';
     }
 
-    // Socials
+    // Socials — only show if logged in
     const socialIcons = {
       instagram: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`,
       facebook: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>`,
       youtube: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon fill="#fff" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`,
       spotify: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path fill="white" d="M17 16.5c-.2.3-.6.4-.9.2-2.5-1.5-5.6-1.9-9.3-1-.4.1-.7-.1-.8-.5-.1-.4.1-.7.5-.8 4-.9 7.5-.5 10.3 1.2.3.2.4.5.2.9zm1.1-2.8c-.3.4-.8.5-1.1.2-2.9-1.8-7.2-2.3-10.5-1.2-.5.1-.9-.1-1-.6-.1-.5.2-.9.6-1 3.8-1.2 8.5-.6 11.8 1.4.3.2.5.7.2 1.2zm.1-2.9c-3.4-2-8.9-2.2-12.2-1.2-.5.2-1-.1-1.2-.6-.2-.5.1-1 .6-1.2C9 6.8 15 7 18.8 9.3c.5.3.6.9.3 1.4-.3.4-.9.6-1.4.3l.5.8z"/></svg>`
     };
-
     const socials = [];
-    if (p.instagram) socials.push(`<a class="social-link" href="${p.instagram}" target="_blank">${socialIcons.instagram} Instagram</a>`);
-    if (p.facebook) socials.push(`<a class="social-link" href="${p.facebook}" target="_blank">${socialIcons.facebook} Facebook</a>`);
-    if (p.youtube) socials.push(`<a class="social-link" href="${p.youtube}" target="_blank">${socialIcons.youtube} YouTube</a>`);
-    if (p.spotify) socials.push(`<a class="social-link" href="${p.spotify}" target="_blank">${socialIcons.spotify} Spotify</a>`);
     const socialSection = document.getElementById('prof-social-section');
+    if (currentSession) {
+      if (p.instagram) socials.push(`<a class="social-link" href="${p.instagram}" target="_blank">${socialIcons.instagram} Instagram</a>`);
+      if (p.facebook) socials.push(`<a class="social-link" href="${p.facebook}" target="_blank">${socialIcons.facebook} Facebook</a>`);
+      if (p.youtube) socials.push(`<a class="social-link" href="${p.youtube}" target="_blank">${socialIcons.youtube} YouTube</a>`);
+      if (p.spotify) socials.push(`<a class="social-link" href="${p.spotify}" target="_blank">${socialIcons.spotify} Spotify</a>`);
+    }
     if (socials.length) {
       document.getElementById('prof-social-links').innerHTML = socials.join('');
       socialSection.style.display = 'block';
@@ -1475,29 +1481,45 @@ async function loadPublicProfile(id) {
     } else {
       gigsList.innerHTML = '<p style="font-size:0.87rem;color:var(--muted);font-weight:300">No upcoming gigs listed.</p>';
     }
-    const reviewsContainer = document.querySelector('#tab-reviews .prof-section');
-    if (reviews.length) {
-      reviewsContainer.innerHTML = `<h3>Reviews</h3>` + reviews.map(r => `
-        <div class="rev">
-          <div class="rname">${r.reviewer_name} ${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-          <div class="rvenue">${r.venue_name || ''}</div>
-          <p>${r.body}</p>
-        </div>`).join('');
-    } else {
-      reviewsContainer.innerHTML = `<h3>Reviews</h3><p style="font-size:0.87rem;color:var(--muted);font-weight:300">No reviews yet.</p>`;
-    }
-    document.getElementById('prof-rate').innerHTML = p.rate ? `${p.rate} <span>/ set</span>` : '<span style="font-size:1rem;font-family:\'Instrument Sans\',sans-serif;font-weight:400">Contact for rates</span>';
-    document.getElementById('prof-message').placeholder = `Tell ${p.first_name || name} about your venue…`;
-
-    // Message button
+    // Booking card
+    document.getElementById('prof-rate').innerHTML = p.rate ? `${p.rate} <span>/ set</span>` : 'Contact for rates';
+    const userId = currentSession?.user?.id || currentSession?.id;
+    const loggedOut = document.getElementById('prof-logged-out');
     const chatBtn = document.getElementById('prof-chat-btn');
-    if (currentSession && (currentSession.user?.id || currentSession.id) !== id) {
+    if (currentSession && userId !== id) {
+      loggedOut.style.display = 'none';
       chatBtn.style.display = 'block';
       chatBtn.onclick = () => startConversation(id);
-      chatBtn.textContent = `💬 Message ${p.first_name || name}`;
+    } else if (currentSession && userId === id) {
+      loggedOut.style.display = 'none';
+      chatBtn.style.display = 'none';
     } else {
+      loggedOut.style.display = 'block';
       chatBtn.style.display = 'none';
     }
+
+    // Reviews tab with leave a review form
+    const reviewsContainer = document.querySelector('#tab-reviews .prof-section');
+    const reviewsList = reviews.length ? reviews.map(r => `
+      <div class="rev">
+        <div class="rname">${r.reviewer_name} ${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+        <div class="rvenue">${r.venue_name || ''}</div>
+        <p>${r.body}</p>
+      </div>`).join('') : '<p style="font-size:0.87rem;color:var(--muted);font-weight:300;margin-bottom:1.5rem">No reviews yet.</p>';
+
+    const reviewForm = currentSession && userId !== id ? `
+      <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border)">
+        <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:1rem">Leave a review</div>
+        <div style="display:flex;gap:0.4rem;margin-bottom:0.75rem" id="star-picker">
+          ${[1,2,3,4,5].map(n=>`<span onclick="setRating(${n})" data-star="${n}" style="font-size:1.4rem;cursor:pointer;opacity:0.3;transition:opacity 0.15s">★</span>`).join('')}
+        </div>
+        <input id="rev-venue" type="text" placeholder="Your venue name" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.84rem;color:var(--text);outline:none;margin-bottom:0.5rem">
+        <textarea id="rev-body" placeholder="Share your experience…" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.84rem;color:var(--text);outline:none;height:80px;resize:none;margin-bottom:0.75rem"></textarea>
+        <button onclick="submitReview('${id}')" style="background:var(--text);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif">Submit review</button>
+        <div id="rev-msg" style="font-size:0.8rem;margin-top:0.5rem;display:none"></div>
+      </div>` : '';
+
+    reviewsContainer.innerHTML = `<h3>Reviews</h3>${reviewsList}${reviewForm}`;
 
   } catch(e) { console.error(e); }
 }
@@ -1528,7 +1550,54 @@ async function loadStats(){
   }
 }
 // ── MESSAGING ─────────────────────────────────────────────
-let currentConvId = null;
+let currentRating = 0;
+function setRating(n) {
+  currentRating = n;
+  document.querySelectorAll('#star-picker span').forEach(s => {
+    s.style.opacity = parseInt(s.dataset.star) <= n ? '1' : '0.3';
+  });
+}
+
+async function submitReview(musicianId) {
+  if (!currentSession || !currentRating) {
+    document.getElementById('rev-msg').textContent = 'Please select a star rating.';
+    document.getElementById('rev-msg').style.color = '#c0392b';
+    document.getElementById('rev-msg').style.display = 'block';
+    return;
+  }
+  const body = document.getElementById('rev-body').value.trim();
+  const venue = document.getElementById('rev-venue').value.trim();
+  if (!body) {
+    document.getElementById('rev-msg').textContent = 'Please write a review.';
+    document.getElementById('rev-msg').style.color = '#c0392b';
+    document.getElementById('rev-msg').style.display = 'block';
+    return;
+  }
+  const userId = currentSession.user?.id || currentSession.id;
+  const profRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=first_name,last_name', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + currentSession.access_token }
+  });
+  const profData = await profRes.json();
+  const reviewer = profData[0];
+  const reviewerName = reviewer ? (reviewer.first_name + ' ' + (reviewer.last_name || '')).trim() : 'Anonymous';
+
+  const res = await fetch(SUPA_URL + '/rest/v1/reviews', {
+    method: 'POST',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + currentSession.access_token, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ musician_id: musicianId, reviewer_name: reviewerName, venue_name: venue, rating: currentRating, body })
+  });
+  if (res.ok) {
+    document.getElementById('rev-msg').textContent = '✅ Review submitted!';
+    document.getElementById('rev-msg').style.color = '#27ae60';
+    document.getElementById('rev-msg').style.display = 'block';
+    document.getElementById('rev-body').value = '';
+    document.getElementById('rev-venue').value = '';
+    currentRating = 0;
+    setTimeout(() => loadPublicProfile(musicianId), 1000);
+  }
+}
+
+
 let currentOtherUser = null;
 let realtimeChannel = null;
 
