@@ -341,6 +341,13 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
       <span class="fc" onclick="tfc(this);runSearch()">Rock</span>
       <span class="fc" onclick="tfc(this);runSearch()">Acoustic</span>
       <span class="fc" onclick="tfc(this);runSearch()">Wedding</span>
+      <span class="fc" onclick="tfc(this);runSearch()">Classical</span>
+      <span class="fc" onclick="tfc(this);runSearch()">Blues</span>
+      <span class="fc" onclick="tfc(this);runSearch()">Irish Ballads</span>
+      <span class="fc" onclick="tfc(this);runSearch()">Soul / R&amp;B</span>
+      <span class="fc" onclick="tfc(this);runSearch()">Country</span>
+      <span class="fc" data-filter="budget" onclick="tfc(this);runSearch()">Under €300</span>
+      <span class="fc" data-filter="toprated" onclick="tfc(this);runSearch()">Top rated</span>
     </div>
   </div>
   <div class="browse-body">
@@ -829,7 +836,8 @@ async function runSearch() {
   const county = document.getElementById('search-county').value;
   const activeGenres = [...document.querySelectorAll('.filter-row .fc.on')]
     .map(el => el.textContent.trim())
-    .filter(g => g !== 'All genres');
+    .filter(g => g !== 'All genres' && g !== 'Under €300' && g !== 'Top rated');
+  const underBudget = [...document.querySelectorAll('.filter-row .fc.on')].some(el => el.textContent.trim() === 'Under €300');
 
   const grid = document.getElementById('mgrid');
   grid.innerHTML = `<div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);font-size:0.85rem">Searching...</div>`;
@@ -858,6 +866,15 @@ async function runSearch() {
       musicians = musicians.filter(m =>
         activeGenres.some(g => (m.genre || []).some(mg => mg.toLowerCase().includes(g.toLowerCase())))
       );
+    }
+
+    // Filter by budget
+    if (underBudget) {
+      musicians = musicians.filter(m => {
+        if (!m.rate) return false;
+        const num = parseInt(m.rate.replace(/[^0-9]/g, ''));
+        return !isNaN(num) && num < 300;
+      });
     }
 
     document.querySelector('.results-meta').textContent = `Showing ${musicians.length} musician${musicians.length !== 1 ? 's' : ''}`;
