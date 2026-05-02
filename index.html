@@ -157,6 +157,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 .rev p{font-size:0.81rem;color:var(--muted);line-height:1.65;font-weight:300}
 
 .book-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);padding:1.4rem;position:sticky;top:72px}
+@media(max-width:660px){.book-card{position:static;margin-top:1rem}}
 .bprice{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:-0.03em;color:var(--text);margin-bottom:1.2rem}
 .bprice span{font-family:'Instrument Sans',sans-serif;font-size:0.8rem;color:var(--muted);font-weight:300}
 .fg{margin-bottom:0.8rem}
@@ -271,6 +272,74 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
 .date-pill{background:var(--lime-bg);color:var(--lime-text);padding:5px 14px;border-radius:20px;font-size:0.8rem;font-weight:500}
 
 
+/* ── MOBILE ──────────────────────────────────────────────── */
+@media(max-width:600px){
+
+  /* Nav */
+  nav{padding:0 1rem}
+  .nav-links a:not(.nav-cta){display:none}
+  .nav-links{gap:0.4rem}
+
+  /* Hero */
+  .hero{padding:3rem 1.25rem 3rem}
+  .hero h1{font-size:2.4rem}
+  .hero-sub{font-size:0.92rem}
+  .hero-btns{flex-direction:column;align-items:stretch;padding:0 0.5rem}
+  .btn-p,.btn-g{text-align:center}
+
+  /* Stats */
+  .stats-row{flex-wrap:wrap}
+  .stat-item{min-width:50%;border-right:none;border-bottom:1px solid var(--border)}
+
+  /* How it works */
+  .section-wrap{padding:2.5rem 1.25rem}
+  .steps-grid{grid-template-columns:1fr 1fr}
+
+  /* Genre chips */
+  .genre-section{padding:2rem 1.25rem}
+  .gchips{gap:0.4rem}
+  .gchip{font-size:0.78rem;padding:6px 14px}
+
+  /* CTA split */
+  .cta-split{grid-template-columns:1fr}
+
+  /* Browse */
+  .browse-top{padding:1.25rem 1.25rem 0}
+  .search-row{flex-direction:column}
+  .s-input,.s-sel,.s-btn{width:100%}
+  .browse-body{padding:1.25rem}
+  .mgrid{grid-template-columns:1fr 1fr}
+
+  /* Profile */
+  .prof-hero-inner{padding:1.25rem 1.25rem 0}
+  .prof-body{padding:1.25rem;grid-template-columns:1fr}
+  .prof-top{gap:1rem}
+  .prof-av{width:60px;height:60px;font-size:1.5rem}
+  .prof-info h1{font-size:1.3rem}
+  .prof-tabs{overflow-x:auto}
+  .ptab{white-space:nowrap;padding:10px 14px;font-size:0.78rem}
+
+  /* My profile edit */
+  .myprof-wrap{padding:1.25rem}
+  .myprof-header{padding:1.25rem}
+  .myprof-section{padding:1.25rem}
+  .frow{grid-template-columns:1fr}
+
+  /* Signup / login */
+  .su-wrap{padding:2rem 1.25rem}
+  .frow{grid-template-columns:1fr}
+
+  /* Messages */
+  #msg-layout{grid-template-columns:1fr!important;height:auto}
+  #chat-window{height:60vh}
+
+  /* Dashboard */
+  .dash-body{padding:1.25rem}
+  .kpis{grid-template-columns:1fr 1fr 1fr}
+
+  /* Gig form */
+  .myprof-section [style*="grid-template-columns:1fr 1fr"]{display:flex;flex-direction:column}
+}
 </style>
 </head>
 <body>
@@ -454,8 +523,11 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
     </div>
     <div>
       <div class="book-card">
-        <div class="bprice" id="prof-rate">Contact for rates</div>
-        <div id="prof-action-wrap" style="margin-top:1.2rem">
+        <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">
+          <div style="font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:0.4rem">Rate per set</div>
+          <div class="bprice" id="prof-rate">Contact for rates</div>
+        </div>
+        <div id="prof-action-wrap">
           <div id="prof-logged-out" style="text-align:center;padding:1rem;background:var(--bg2);border-radius:10px;border:1px solid var(--border)">
             <p style="font-size:0.83rem;color:var(--muted);margin-bottom:0.75rem">Sign in to message this musician</p>
             <button class="btn-p" style="width:100%;font-size:0.85rem" onclick="go('login')">Sign in</button>
