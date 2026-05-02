@@ -375,24 +375,40 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
       </div>
     </div>
     <div class="prof-tabs">
-      <div class="ptab on">Overview</div>
-      <div class="ptab">Samples</div>
-      <div class="ptab">Reviews</div>
+      <div class="ptab on" onclick="switchTab(this,'tab-overview')">Overview</div>
+      <div class="ptab" onclick="switchTab(this,'tab-media')">Media</div>
+      <div class="ptab" onclick="switchTab(this,'tab-reviews')">Reviews</div>
     </div>
   </div>
   <div class="prof-body">
     <div>
-      <div class="prof-section" id="prof-bio-section">
-        <h3>About</h3>
-        <p id="prof-bio-text" style="font-size:0.87rem;color:var(--muted);line-height:1.75;font-weight:300">No bio yet.</p>
+      <div id="tab-overview" class="tab-panel">
+        <div class="prof-section" id="prof-bio-section">
+          <h3>About</h3>
+          <p id="prof-bio-text" style="font-size:0.87rem;color:var(--muted);line-height:1.75;font-weight:300">No bio yet.</p>
+        </div>
+        <div class="prof-section" id="prof-social-section" style="display:none">
+          <h3>Find me online</h3>
+          <div id="prof-social-links" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+        </div>
+        <div class="prof-section" id="prof-dates-section" style="display:none">
+          <h3>Available dates</h3>
+          <div id="prof-dates-list" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+        </div>
       </div>
-      <div class="prof-section" id="prof-social-section" style="display:none">
-        <h3>Find me online</h3>
-        <div id="prof-social-links" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+
+      <div id="tab-media" class="tab-panel" style="display:none">
+        <div class="prof-section">
+          <h3>Media</h3>
+          <div id="prof-media-list"><p style="font-size:0.87rem;color:var(--muted);font-weight:300">No media added yet.</p></div>
+        </div>
       </div>
-      <div class="prof-section" id="prof-dates-section" style="display:none">
-        <h3>Available dates</h3>
-        <div id="prof-dates-list" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+
+      <div id="tab-reviews" class="tab-panel" style="display:none">
+        <div class="prof-section">
+          <h3>Reviews</h3>
+          <p id="prof-reviews-empty" style="font-size:0.87rem;color:var(--muted);font-weight:300">No reviews yet.</p>
+        </div>
       </div>
     </div>
     <div>
@@ -969,7 +985,37 @@ function setR(el,r){
     if(subText) subText.textContent='Free to join as a musician.';
   }
 }
-function renderDatePills(dates) {
+function renderMediaLinks(links) {
+  document.getElementById('ep-media-list').innerHTML = links.map(url => `
+    <div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px" data-url="${url}">
+      <span style="font-size:0.83rem;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${url}</span>
+      <span onclick="removeMediaLink('${url}')" style="cursor:pointer;color:var(--muted);font-size:0.8rem;flex-shrink:0">✕</span>
+    </div>`).join('');
+}
+
+function addMediaLink() {
+  const input = document.getElementById('ep-media-input');
+  const url = input.value.trim();
+  if (!url) return;
+  const existing = [...document.querySelectorAll('#ep-media-list [data-url]')].map(d => d.dataset.url);
+  if (existing.includes(url)) return;
+  renderMediaLinks([...existing, url]);
+  input.value = '';
+}
+
+function removeMediaLink(url) {
+  const existing = [...document.querySelectorAll('#ep-media-list [data-url]')].map(d => d.dataset.url).filter(u => u !== url);
+  renderMediaLinks(existing);
+}
+
+function switchTab(el, tabId) {
+  document.querySelectorAll('.prof-tabs .ptab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  el.classList.add('on');
+  document.getElementById(tabId).style.display = 'block';
+}
+
+
   document.getElementById('ep-dates-list').innerHTML = dates.map(d => `
     <span class="date-pill" data-date="${d}" style="display:inline-flex;align-items:center;gap:6px">
       ${d} <span onclick="removeDate('${d}')" style="cursor:pointer;opacity:0.6;font-size:0.8rem">✕</span>
@@ -1025,6 +1071,7 @@ async function loadMyProfile() {
     }
 
     if (p.available_dates?.length) renderDatePills(p.available_dates);
+    if (p.media_links?.length) renderMediaLinks(p.media_links);
 
     if (p.avatar_url) {
       document.getElementById('myprof-avatar-display').innerHTML = `<img src="${p.avatar_url}" alt="Profile photo">`;
@@ -1061,6 +1108,10 @@ async function saveMyProfile() {
   // Save available dates
   const dates = [...document.querySelectorAll('#ep-dates-list .date-pill')].map(d => d.dataset.date);
   if (dates.length > 0) updates.available_dates = dates;
+
+  // Save media links
+  const media = [...document.querySelectorAll('#ep-media-list [data-url]')].map(d => d.dataset.url);
+  if (media.length > 0) updates.media_links = media;
 
   try {
     await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
@@ -1205,8 +1256,24 @@ async function loadPublicProfile(id) {
       datesSection.style.display = 'none';
     }
 
-    // Booking card
-    document.querySelector('.bprice').innerHTML = p.rate ? `${p.rate} <span>/ set</span>` : 'Contact for rates';
+    // Reset tabs to overview
+    switchTab(document.querySelector('.prof-tabs .ptab'), 'tab-overview');
+
+    // Media
+    const mediaList = document.getElementById('prof-media-list');
+    if (p.media_links?.length) {
+      mediaList.innerHTML = p.media_links.map(url => {
+        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+        if (ytMatch) {
+          return `<div style="margin-bottom:1rem;border-radius:10px;overflow:hidden;aspect-ratio:16/9">
+            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen style="display:block"></iframe>
+          </div>`;
+        }
+        return `<a class="social-link" href="${url}" target="_blank">🎵 View media</a>`;
+      }).join('');
+    } else {
+      mediaList.innerHTML = '<p style="font-size:0.87rem;color:var(--muted);font-weight:300">No media added yet.</p>';
+    }
     document.querySelector('.fg textarea').placeholder = `Tell ${p.first_name || name} about your venue…`;
 
   } catch(e) { console.error(e); }
@@ -1311,6 +1378,15 @@ async function loadStats(){
         <span class="gpill" onclick="togglePill(this)" data-value="Country">Country</span>
         <span class="gpill" onclick="togglePill(this)" data-value="Soul / R&B">Soul / R&B</span>
       </div>
+    </div>
+
+    <div class="myprof-section">
+      <h3>Media <span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:0.72rem">(add YouTube links)</span></h3>
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
+        <input id="ep-media-input" type="url" placeholder="https://youtube.com/watch?v=..." style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Instrument Sans',sans-serif;font-size:0.87rem;color:var(--text);outline:none">
+        <button onclick="addMediaLink()" style="background:var(--text);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:0.83rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;font-weight:500">Add</button>
+      </div>
+      <div id="ep-media-list" style="display:flex;flex-direction:column;gap:0.4rem"></div>
     </div>
 
     <div class="myprof-section">
