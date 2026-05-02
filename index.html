@@ -103,7 +103,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
 .mcard{background:var(--bg);cursor:pointer;transition:background 0.15s;position:relative}
 .mcard:hover{background:var(--bg2)}
-.mcard-img{height:180px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;border-bottom:1px solid var(--border)}
+.mcard-img{height:220px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;border-bottom:1px solid var(--border)}
 .mbadge{position:absolute;top:10px;left:10px;background:var(--text);color:#fff;font-size:0.62rem;font-weight:700;padding:3px 9px;border-radius:6px;letter-spacing:0.04em;text-transform:uppercase}
 .mcard-body{padding:1rem}
 .mcard-body h3{font-size:0.92rem;font-weight:600;letter-spacing:-0.02em;margin-bottom:3px;color:var(--text)}
@@ -981,12 +981,13 @@ async function uploadAvatar(input) {
   const file = input.files[0];
   const userId = currentSession.user?.id || currentSession.id;
   if (!userId) { alert('Please log in again to upload a photo.'); return; }
-  const ext = file.name.split('.').pop().toLowerCase();
-  const path = userId + '/avatar.' + ext;
   const token = currentSession.access_token || currentSession.session?.access_token;
 
+  // Crop and resize to 600x600 square
+  const croppedBlob = await cropToSquare(file, 600);
+  const path = userId + '/avatar.jpg';
+
   try {
-    // Try DELETE first in case file exists (upsert workaround)
     await fetch(SUPA_URL + '/storage/v1/object/avatars/' + path, {
       method: 'DELETE',
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token }
@@ -997,16 +998,15 @@ async function uploadAvatar(input) {
       headers: {
         'apikey': SUPA_KEY,
         'Authorization': 'Bearer ' + token,
-        'Content-Type': file.type,
+        'Content-Type': 'image/jpeg',
         'x-upsert': 'true'
       },
-      body: file
+      body: croppedBlob
     });
 
     if (res.ok) {
       const avatarUrl = SUPA_URL + '/storage/v1/object/public/avatars/' + path + '?t=' + Date.now();
       document.getElementById('myprof-avatar-display').innerHTML = `<img src="${avatarUrl}" alt="Profile photo">`;
-
       await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
         method: 'PATCH',
         headers: {
@@ -1019,13 +1019,29 @@ async function uploadAvatar(input) {
       });
     } else {
       const err = await res.json();
-      console.error('Upload error:', err);
       alert('Upload failed: ' + (err.message || err.error || 'Unknown error'));
     }
-  } catch(e) { 
-    console.error(e);
-    alert('Could not upload photo. Please try again.'); 
-  }
+  } catch(e) { console.error(e); alert('Could not upload photo. Please try again.'); }
+}
+
+function cropToSquare(file, size) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width - min) / 2;
+      const sy = (img.height - min) / 2;
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(resolve, 'image/jpeg', 0.85);
+    };
+    img.src = url;
+  });
 }
 
 async function loadStats(){
