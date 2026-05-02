@@ -413,12 +413,12 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
     </div>
     <div>
       <div class="book-card">
-        <div class="bprice">€350 <span>/ 2hr set</span></div>
+        <div class="bprice" id="prof-rate">€350 <span>/ 2hr set</span></div>
         <div class="fg"><label>Event date</label><input type="date"></div>
         <div class="fg"><label>Event type</label><select><option>Pub session</option><option>Private event</option><option>Wedding</option><option>Festival</option><option>Corporate</option></select></div>
         <div class="fg"><label>Venue name</label><input type="text" placeholder="e.g. The Cobblestone"></div>
-        <div class="fg"><label>Message</label><textarea placeholder="Tell Siobhán about your venue…"></textarea></div>
-        <button class="send-btn" onclick="alert('Enquiry sent! Siobhán will respond within 24 hours.')">Send enquiry →</button>
+        <div class="fg"><label>Message</label><textarea id="prof-message" placeholder="Tell them about your venue…"></textarea></div>
+        <button class="send-btn" onclick="alert('Enquiry sent!')">Send enquiry →</button>
         <div class="book-note">Free to enquire · No payment now</div>
       </div>
     </div>
@@ -1274,7 +1274,8 @@ async function loadPublicProfile(id) {
     } else {
       mediaList.innerHTML = '<p style="font-size:0.87rem;color:var(--muted);font-weight:300">No media added yet.</p>';
     }
-    document.querySelector('.fg textarea').placeholder = `Tell ${p.first_name || name} about your venue…`;
+    document.getElementById('prof-rate').innerHTML = p.rate ? `${p.rate} <span>/ set</span>` : '<span style="font-size:1rem;font-family:\'Instrument Sans\',sans-serif;font-weight:400">Contact for rates</span>';
+    document.getElementById('prof-message').placeholder = `Tell ${p.first_name || name} about your venue…`;
 
   } catch(e) { console.error(e); }
 }
