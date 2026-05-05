@@ -1086,13 +1086,11 @@ async function handleLogin() {
 
 // Add IDs to signup form fields
 document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('s-landing').classList.add('active');
   const hash = window.location.hash;
-  const musicianMatch = hash.match(/^#musician\/([a-f0-9-]+)$/);
+  const musicianMatch = hash.match(/^#musician\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
   if (musicianMatch) {
     loadPublicProfile(musicianMatch[1]);
-  } else {
-    // Show landing first, initAuth will redirect if logged in
-    document.getElementById('s-landing').classList.add('active');
   }
   initAuth();
   loadStats();
