@@ -270,6 +270,19 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
 .social-link:hover{background:var(--text);color:#fff!important;border-color:var(--text)}
 .social-link svg{flex-shrink:0;color:inherit}
 .date-pill{background:var(--lime-bg);color:var(--lime-text);padding:5px 14px;border-radius:20px;font-size:0.8rem;font-weight:500}
+.conv-item{padding:0.85rem 1rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--border)}
+.conv-item:hover,.conv-item.active{background:var(--bg2)}
+.conv-av{width:38px;height:38px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;overflow:hidden;flex-shrink:0}
+.conv-av img{width:100%;height:100%;object-fit:cover}
+.conv-info{flex:1;min-width:0}
+.conv-name{font-size:0.85rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-preview{font-size:0.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-unread{width:8px;height:8px;border-radius:50%;background:var(--lime);flex-shrink:0}
+.msg-bubble{max-width:70%;padding:9px 13px;border-radius:12px;font-size:0.85rem;line-height:1.5;word-break:break-word}
+.msg-out{background:var(--text);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.msg-in{background:var(--bg2);color:var(--text);align-self:flex-start;border-bottom-left-radius:3px}
+.msg-time{font-size:0.67rem;color:var(--muted);margin-top:2px}
+.msg-out .msg-time{text-align:right}
 
 
 /* ── MOBILE ──────────────────────────────────────────────── */
@@ -846,27 +859,24 @@ async function initAuth() {
   if (hash.includes('access_token')) {
     const params = new URLSearchParams(hash.replace('#', '?'));
     const accessToken = params.get('access_token');
-    const userId = params.get('user_id') || null;
-
     if (accessToken) {
-      // Get user details
-      const userRes = await fetch(SUPA_URL + '/auth/v1/user', {
-        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
-      });
-      const userData = await userRes.json();
-      if (userData.id) {
-        currentSession = { access_token: accessToken, user: userData };
-        localStorage.setItem('sb-session', JSON.stringify(currentSession));
-        await saveProfile(userData.id, accessToken);
-        // Get role
-        const rRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userData.id + '&select=role', {
+      try {
+        const userRes = await fetch(SUPA_URL + '/auth/v1/user', {
           headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
         });
-        const rData = await rRes.json();
-        currentUserRole = rData[0]?.role || 'musician';
-        updateNavForUser();
-        go(currentUserRole === 'venue' ? 'dash' : 'myprofile');
-      }
+        const userData = await userRes.json();
+        if (userData.id) {
+          currentSession = { access_token: accessToken, user: userData };
+          localStorage.setItem('sb-session', JSON.stringify(currentSession));
+          await saveProfile(userData.id, accessToken);
+          const rRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userData.id + '&select=role', {
+            headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
+          });
+          const rData = await rRes.json();
+          currentUserRole = rData[0]?.role || 'musician';
+          updateNavForUser();
+        }
+      } catch(e) { console.error(e); }
       window.history.replaceState({}, document.title, window.location.pathname);
       return;
     }
@@ -889,7 +899,6 @@ async function initAuth() {
           localStorage.setItem('sb-session', JSON.stringify(currentSession));
         }
       }
-      // Get role
       const userId = currentSession.user?.id || currentSession.id;
       const roleRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=role', {
         headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + (currentSession.access_token || SUPA_KEY) }
@@ -2253,21 +2262,5 @@ function openConversationById(convId, otherId, otherName, otherAvatar) {
 
   </div>
 </div>
-
-<style>
-.conv-item{padding:0.85rem 1rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--border)}
-.conv-item:hover,.conv-item.active{background:var(--bg2)}
-.conv-av{width:38px;height:38px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;overflow:hidden;flex-shrink:0}
-.conv-av img{width:100%;height:100%;object-fit:cover}
-.conv-info{flex:1;min-width:0}
-.conv-name{font-size:0.85rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.conv-preview{font-size:0.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.conv-unread{width:8px;height:8px;border-radius:50%;background:var(--lime);flex-shrink:0}
-.msg-bubble{max-width:70%;padding:9px 13px;border-radius:12px;font-size:0.85rem;line-height:1.5;word-break:break-word}
-.msg-out{background:var(--text);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
-.msg-in{background:var(--bg2);color:var(--text);align-self:flex-start;border-bottom-left-radius:3px}
-.msg-time{font-size:0.67rem;color:var(--muted);margin-top:2px}
-.msg-out .msg-time{text-align:right}
-</style>
 
 </html>
