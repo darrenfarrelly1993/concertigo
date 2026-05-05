@@ -476,7 +476,13 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
       <div class="prof-top">
         <div class="prof-av">🎻</div>
         <div class="prof-info">
-          <h1>Siobhán &amp; The Reel</h1>
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
+            <h1 id="prof-name-heading">Siobhán &amp; The Reel</h1>
+            <button id="share-btn" onclick="shareProfile()" title="Share profile" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:5px;font-size:0.78rem;font-family:'Instrument Sans',sans-serif;transition:all 0.15s" onmouseover="this.style.borderColor='var(--text)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share
+            </button>
+          </div>
           <div class="psub">Traditional Irish · Dublin · Trio</div>
           <div class="pbadges">
             <span class="pb pb-lime">★ 4.9 — 87 reviews</span>
@@ -485,10 +491,6 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
           </div>
         </div>
       </div>
-      <button id="share-btn" onclick="shareProfile()" style="flex-shrink:0;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:0.8rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;color:var(--muted);display:flex;align-items:center;gap:6px" onmouseover="this.style.borderColor='var(--text)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-        Share
-      </button>
     </div>
     <div class="prof-tabs">
       <div class="ptab on" onclick="switchTab(this,'tab-overview')">Overview</div>
@@ -1260,6 +1262,22 @@ function addMediaLink() {
 function removeMediaLink(url) {
   const existing = [...document.querySelectorAll('#ep-media-list [data-url]')].map(d => d.dataset.url).filter(u => u !== url);
   renderMediaLinks(existing);
+}
+
+function shareProfile() {
+  const url = window.location.origin + window.location.pathname + window.location.hash;
+  const btn = document.getElementById('share-btn');
+  if (navigator.share) {
+    navigator.share({ title: (document.querySelector('.prof-info h1')?.textContent || 'Musician') + ' on Concertigo', url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✅ Copied!';
+      btn.style.color = 'var(--lime-text)';
+      btn.style.borderColor = 'var(--lime-text)';
+      setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; btn.style.borderColor = ''; }, 2000);
+    });
+  }
 }
 
 function switchTab(el, tabId) {
