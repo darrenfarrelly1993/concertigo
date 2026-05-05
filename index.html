@@ -472,6 +472,7 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
   <div class="prof-hero">
   <div class="prof-hero-inner">
     <div class="prof-back" onclick="go('browse')">← Back to results</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem">
     <div class="prof-top">
       <div class="prof-av">🎻</div>
       <div class="prof-info">
@@ -560,9 +561,16 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
 <!-- VENUE DASH -->
 <div id="s-dash" class="screen">
   <div class="dash-top">
-    <h2>Venue dashboard</h2>
-    <p>The Cobblestone, Smithfield · Dublin 7</p>
+    <h2 id="dash-title">Venue dashboard</h2>
+    <p id="dash-sub">Your venue</p>
+    <div class="prof-tabs" style="margin-top:1.2rem">
+      <div class="ptab on" onclick="switchDashTab(this,'dash-tab-main')">Dashboard</div>
+      <div class="ptab" onclick="switchDashTab(this,'dash-tab-profile')">Profile</div>
+    </div>
   </div>
+
+  <!-- DASHBOARD TAB -->
+  <div id="dash-tab-main">
   <div class="dash-body">
     <div class="dcard full">
       <h3>May at a glance</h3>
@@ -600,6 +608,55 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
       <button class="btn-p" onclick="go('browse')">Browse musicians →</button>
     </div>
   </div>
+  </div><!-- end dash-tab-main -->
+
+  <!-- PROFILE TAB -->
+  <div id="dash-tab-profile" style="display:none">
+    <div class="myprof-wrap">
+      <div class="myprof-header">
+        <div class="myprof-avatar-wrap">
+          <div class="myprof-avatar" id="venue-avatar-display" onclick="document.getElementById('venue-avatar-upload').click()">🏛</div>
+          <div class="myprof-avatar-overlay" onclick="document.getElementById('venue-avatar-upload').click()">Change photo</div>
+          <input type="file" id="venue-avatar-upload" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+        </div>
+        <div class="myprof-info">
+          <h2 id="venue-prof-name">Your Venue</h2>
+          <div class="msub" id="venue-prof-sub">Loading...</div>
+        </div>
+      </div>
+      <div class="myprof-section">
+        <h3>Venue details</h3>
+        <div class="edit-field"><label>Venue name</label><input id="vp-actname" type="text" placeholder="e.g. The Cobblestone"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+          <div class="edit-field"><label>First name</label><input id="vp-firstname" type="text"></div>
+          <div class="edit-field"><label>Last name</label><input id="vp-lastname" type="text"></div>
+        </div>
+        <div class="edit-field"><label>County</label>
+          <select id="vp-county">
+            <optgroup label="Leinster"><option>Dublin</option><option>Wicklow</option><option>Wexford</option><option>Carlow</option><option>Kilkenny</option><option>Waterford</option><option>Kildare</option><option>Meath</option><option>Louth</option><option>Westmeath</option><option>Offaly</option><option>Laois</option><option>Longford</option></optgroup>
+            <optgroup label="Munster"><option>Cork</option><option>Kerry</option><option>Limerick</option><option>Clare</option><option>Tipperary</option></optgroup>
+            <optgroup label="Connacht"><option>Galway</option><option>Mayo</option><option>Sligo</option><option>Roscommon</option><option>Leitrim</option></optgroup>
+            <optgroup label="Ulster"><option>Donegal</option><option>Cavan</option><option>Monaghan</option><option>Antrim</option><option>Armagh</option><option>Derry</option><option>Down</option><option>Fermanagh</option><option>Tyrone</option></optgroup>
+          </select>
+        </div>
+      </div>
+      <div class="myprof-section">
+        <h3>About</h3>
+        <div class="edit-field"><label>Bio</label><textarea id="vp-bio" placeholder="Tell musicians about your venue — capacity, style, what kind of acts you book…"></textarea></div>
+      </div>
+      <div class="myprof-section">
+        <h3>Social media</h3>
+        <div class="edit-field"><label>Instagram URL</label><input id="vp-instagram" type="url" placeholder="https://instagram.com/yourvenue"></div>
+        <div class="edit-field"><label>Facebook URL</label><input id="vp-facebook" type="url" placeholder="https://facebook.com/yourvenue"></div>
+        <div class="edit-field"><label>Website</label><input id="vp-website" type="url" placeholder="https://yourvenue.ie"></div>
+      </div>
+      <div style="display:flex;align-items:center;margin-top:0.5rem">
+        <button class="save-btn" onclick="saveVenueProfile()">Save profile</button>
+        <span class="save-msg" id="venue-save-msg">✅ Saved!</span>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- SIGNUP -->
@@ -838,14 +895,21 @@ async function initAuth() {
   }
 }
 
-function updateNavForUser() {
+async function updateNavForUser() {
   const cta = document.querySelector('.nav-cta');
   const signInLink = document.getElementById('nav-signin');
   const signOutLink = document.getElementById('nav-signout');
   const navMessages = document.getElementById('nav-messages');
   if (currentSession) {
-    cta.textContent = 'My Profile';
-    cta.onclick = () => go('myprofile');
+    // Check role
+    const userId = currentSession.user?.id || currentSession.id;
+    const res = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=role', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + (currentSession.access_token || SUPA_KEY) }
+    });
+    const data = await res.json();
+    const role = data[0]?.role;
+    cta.textContent = role === 'venue' ? 'Dashboard' : 'My Profile';
+    cta.onclick = () => go(role === 'venue' ? 'dash' : 'myprofile');
     if (signInLink) signInLink.style.display = 'none';
     if (signOutLink) signOutLink.style.display = '';
     if (navMessages) navMessages.style.display = '';
@@ -998,7 +1062,14 @@ async function handleLogin() {
     updateNavForUser();
     btn.textContent = 'Sign in →';
     btn.disabled = false;
-    go('myprofile');
+
+    // Redirect based on role
+    const roleRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + (data.user?.id || data.id) + '&select=role', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + data.access_token }
+    });
+    const roleData = await roleRes.json();
+    const role = roleData[0]?.role;
+    go(role === 'venue' ? 'dash' : 'myprofile');
   } catch(e) {
     errEl.textContent = 'Something went wrong. Please try again.';
     errEl.style.display = 'block';
@@ -1009,6 +1080,12 @@ async function handleLogin() {
 
 // Add IDs to signup form fields
 document.addEventListener('DOMContentLoaded', () => {
+  // Check for musician profile hash on load
+  const hash = window.location.hash;
+  const musicianMatch = hash.match(/^#musician\/([a-f0-9-]+)$/);
+  if (musicianMatch) {
+    loadPublicProfile(musicianMatch[1]);
+  }
   initAuth();
   loadStats();
 });
@@ -1071,7 +1148,7 @@ async function runSearch() {
     }
 
     grid.innerHTML = musicians.map(m => `
-      <div class="mcard" onclick="loadPublicProfile('${m.id}')">
+      <div class="mcard" onclick="goProfile('${m.id}')">
         <div class="mcard-img" style="background:#f0f5f2;overflow:hidden">
           ${m.avatar_url ? `<img src="${m.avatar_url}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:2.4rem">🎵</span>`}
           ${m.county ? `<div class="mbadge">${m.county}</div>` : ''}
@@ -1098,6 +1175,14 @@ function go(s){
   if(s==='browse') rGrid();
   if(s==='myprofile') loadMyProfile();
   if(s==='messages') loadConversations();
+  if(s==='dash') loadVenueDashboard();
+  // Clear hash when navigating away from profile
+  if(s !== 'profile') window.history.replaceState({}, '', window.location.pathname);
+}
+
+function goProfile(id) {
+  window.history.replaceState({}, '', '#musician/' + id);
+  loadPublicProfile(id);
 }
 function toggleProvince(el, province){
   const pills = document.querySelectorAll('.county-pill.' + province);
@@ -1639,6 +1724,70 @@ async function loadPublicProfile(id) {
 
   } catch(e) { console.error(e); }
 }
+
+function switchDashTab(el, tabId) {
+  document.querySelectorAll('.dash-top .ptab').forEach(t => t.classList.remove('on'));
+  document.getElementById('dash-tab-main').style.display = 'none';
+  document.getElementById('dash-tab-profile').style.display = 'none';
+  el.classList.add('on');
+  document.getElementById(tabId).style.display = 'block';
+}
+
+async function loadVenueDashboard() {
+  if (!currentSession) { go('login'); return; }
+  const userId = currentSession.user?.id || currentSession.id;
+  const token = currentSession.access_token;
+  try {
+    const res = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=*', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    const p = data[0];
+    if (!p) return;
+    const name = p.act_name || p.first_name || 'Your venue';
+    document.getElementById('dash-title').textContent = name;
+    document.getElementById('dash-sub').textContent = p.county || 'Ireland';
+
+    // Populate profile tab
+    document.getElementById('venue-prof-name').textContent = name;
+    document.getElementById('venue-prof-sub').textContent = p.county || '';
+    document.getElementById('vp-firstname').value = p.first_name || '';
+    document.getElementById('vp-lastname').value = p.last_name || '';
+    document.getElementById('vp-actname').value = p.act_name || '';
+    document.getElementById('vp-bio').value = p.bio || '';
+    document.getElementById('vp-instagram').value = p.instagram || '';
+    document.getElementById('vp-facebook').value = p.facebook || '';
+    document.getElementById('vp-website').value = p.website || '';
+    if (p.county) document.getElementById('vp-county').value = p.county;
+    if (p.avatar_url) document.getElementById('venue-avatar-display').innerHTML = `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
+  } catch(e) { console.error(e); }
+}
+
+async function saveVenueProfile() {
+  if (!currentSession) return;
+  const userId = currentSession.user?.id || currentSession.id;
+  const updates = {
+    first_name: document.getElementById('vp-firstname').value.trim(),
+    last_name: document.getElementById('vp-lastname').value.trim(),
+    act_name: document.getElementById('vp-actname').value.trim(),
+    bio: document.getElementById('vp-bio').value.trim(),
+    county: document.getElementById('vp-county').value,
+    instagram: document.getElementById('vp-instagram').value.trim() || null,
+    facebook: document.getElementById('vp-facebook').value.trim() || null,
+    website: document.getElementById('vp-website').value.trim() || null,
+  };
+  await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + currentSession.access_token, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify(updates)
+  });
+  document.getElementById('venue-prof-name').textContent = updates.act_name || updates.first_name;
+  document.getElementById('venue-prof-sub').textContent = updates.county;
+  document.getElementById('venue-save-msg').style.display = 'inline';
+  setTimeout(() => document.getElementById('venue-save-msg').style.display = 'none', 3000);
+}
+
+
 
 async function loadStats(){
   try {
