@@ -1087,11 +1087,6 @@ async function handleLogin() {
 // Add IDs to signup form fields
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('s-landing').classList.add('active');
-  const hash = window.location.hash;
-  const musicianMatch = hash.match(/^#musician\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
-  if (musicianMatch) {
-    loadPublicProfile(musicianMatch[1]);
-  }
   initAuth();
   loadStats();
 });
@@ -1187,7 +1182,6 @@ function go(s){
 }
 
 function goProfile(id) {
-  window.history.replaceState({}, '', '#musician/' + id);
   loadPublicProfile(id);
 }
 function toggleProvince(el, province){
@@ -1265,7 +1259,7 @@ function removeMediaLink(url) {
 }
 
 function shareProfile() {
-  const url = window.location.origin + window.location.pathname + window.location.hash;
+  const url = 'https://www.concertigo.ie';
   const btn = document.getElementById('share-btn');
   if (navigator.share) {
     navigator.share({ title: (document.querySelector('.prof-info h1')?.textContent || 'Musician') + ' on Concertigo', url });
