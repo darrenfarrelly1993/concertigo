@@ -351,7 +351,7 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
   <div class="nav-links">
     <a onclick="go('browse')">Find Musicians</a>
     <a onclick="go('dash')">For Venues</a>
-    <a id="nav-signin" onclick="go('login')">Sign In</a>
+    <a id="nav-signin" href="#" onclick="event.preventDefault();go('login')">Sign In</a>
     <a id="nav-signout" style="display:none" onclick="signOut()">Sign Out</a>
     <a id="nav-messages" style="display:none" onclick="go('messages')">Messages</a>
     <a onclick="go('signup')" class="nav-cta">Join Free</a>
