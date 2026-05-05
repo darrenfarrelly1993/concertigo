@@ -828,6 +828,7 @@ async function supaFetch(path, options={}) {
 
 let currentSession = null;
 let currentRole = 'musician';
+let currentUserRole = 'musician';
 
 // Check for existing session on load
 async function saveProfile(userId, accessToken) {
@@ -882,7 +883,6 @@ async function initAuth() {
   if (stored) {
     try {
       currentSession = JSON.parse(stored);
-      // Refresh the session token
       const refreshToken = currentSession.refresh_token;
       if (refreshToken) {
         const refreshRes = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
@@ -896,26 +896,26 @@ async function initAuth() {
           localStorage.setItem('sb-session', JSON.stringify(currentSession));
         }
       }
+      // Get role
+      const userId = currentSession.user?.id || currentSession.id;
+      const roleRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=role', {
+        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + (currentSession.access_token || SUPA_KEY) }
+      });
+      const roleData = await roleRes.json();
+      currentUserRole = roleData[0]?.role || 'musician';
       updateNavForUser();
     } catch(e) { console.error('Session restore error:', e); }
   }
 }
 
-async function updateNavForUser() {
+function updateNavForUser() {
   const cta = document.querySelector('.nav-cta');
   const signInLink = document.getElementById('nav-signin');
   const signOutLink = document.getElementById('nav-signout');
   const navMessages = document.getElementById('nav-messages');
   if (currentSession) {
-    // Check role
-    const userId = currentSession.user?.id || currentSession.id;
-    const res = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=role', {
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + (currentSession.access_token || SUPA_KEY) }
-    });
-    const data = await res.json();
-    const role = data[0]?.role;
-    cta.textContent = role === 'venue' ? 'Dashboard' : 'My Profile';
-    cta.onclick = () => go(role === 'venue' ? 'dash' : 'myprofile');
+    cta.textContent = currentUserRole === 'venue' ? 'Dashboard' : 'My Profile';
+    cta.onclick = () => go(currentUserRole === 'venue' ? 'dash' : 'myprofile');
     if (signInLink) signInLink.style.display = 'none';
     if (signOutLink) signOutLink.style.display = '';
     if (navMessages) navMessages.style.display = '';
@@ -1065,17 +1065,17 @@ async function handleLogin() {
 
     currentSession = data;
     localStorage.setItem('sb-session', JSON.stringify(data));
-    updateNavForUser();
-    btn.textContent = 'Sign in →';
-    btn.disabled = false;
 
-    // Redirect based on role
+    // Get role and redirect
     const roleRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + (data.user?.id || data.id) + '&select=role', {
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + data.access_token }
     });
     const roleData = await roleRes.json();
-    const role = roleData[0]?.role;
-    go(role === 'venue' ? 'dash' : 'myprofile');
+    currentUserRole = roleData[0]?.role || 'musician';
+    updateNavForUser();
+    btn.textContent = 'Sign in →';
+    btn.disabled = false;
+    go(currentUserRole === 'venue' ? 'dash' : 'myprofile');
   } catch(e) {
     errEl.textContent = 'Something went wrong. Please try again.';
     errEl.style.display = 'block';
