@@ -866,13 +866,14 @@ async function initAuth() {
         currentSession = { access_token: accessToken, user: userData };
         localStorage.setItem('sb-session', JSON.stringify(currentSession));
         await saveProfile(userData.id, accessToken);
+        // Get role
+        const rRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userData.id + '&select=role', {
+          headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
+        });
+        const rData = await rRes.json();
+        currentUserRole = rData[0]?.role || 'musician';
         updateNavForUser();
-        // Show login page with success message
-        go('login');
-        const msg = document.createElement('div');
-        msg.style.cssText = 'color:#27ae60;font-size:0.85rem;margin-bottom:1rem;text-align:center';
-        msg.textContent = '✅ Email confirmed! You\'re all set.';
-        document.querySelector('#s-login .su-wrap').insertBefore(msg, document.querySelector('#s-login .toggle-row') || document.querySelector('#s-login .sfg'));
+        go(currentUserRole === 'venue' ? 'dash' : 'myprofile');
       }
       window.history.replaceState({}, document.title, window.location.pathname);
       return;
@@ -1170,12 +1171,10 @@ async function runSearch() {
 async function rGrid(){ await runSearch(); }
 
 function go(s){
-  console.log('go called with:', s);
   const target = document.getElementById('s-'+s);
-  if (!target) { console.error('Screen not found: s-'+s); alert('Screen not found: ' + s); return; }
+  if (!target) { console.error('Screen not found: s-'+s); return; }
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   target.classList.add('active');
-  console.log('Active screen set to:', s, 'display:', target.style.display, 'classes:', target.className);
   window.scrollTo({top:0,behavior:'smooth'});
   if(s==='browse') rGrid();
   if(s==='myprofile') loadMyProfile();
