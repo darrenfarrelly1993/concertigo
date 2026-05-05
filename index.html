@@ -424,10 +424,22 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
     <div class="search-row">
       <input id="search-input" class="s-input" type="text" placeholder="Search by name, genre or keyword…">
       <select id="search-county" class="s-sel">
-        <option value="">All Ireland</option><option>Dublin</option><option>Cork</option>
-        <option>Galway</option><option>Limerick</option><option>Kilkenny</option>
-        <option>Clare</option><option>Kerry</option><option>Tipperary</option>
-        <option>Waterford</option><option>Wexford</option>
+        <option value="">All Ireland</option>
+        <optgroup label="Leinster">
+          <option>Dublin</option><option>Wicklow</option><option>Wexford</option><option>Carlow</option>
+          <option>Kilkenny</option><option>Waterford</option><option>Kildare</option><option>Meath</option>
+          <option>Louth</option><option>Westmeath</option><option>Offaly</option><option>Laois</option><option>Longford</option>
+        </optgroup>
+        <optgroup label="Munster">
+          <option>Cork</option><option>Kerry</option><option>Limerick</option><option>Clare</option><option>Tipperary</option>
+        </optgroup>
+        <optgroup label="Connacht">
+          <option>Galway</option><option>Mayo</option><option>Sligo</option><option>Roscommon</option><option>Leitrim</option>
+        </optgroup>
+        <optgroup label="Ulster">
+          <option>Donegal</option><option>Cavan</option><option>Monaghan</option><option>Antrim</option>
+          <option>Armagh</option><option>Derry</option><option>Down</option><option>Fermanagh</option><option>Tyrone</option>
+        </optgroup>
       </select>
       <button class="s-btn" onclick="runSearch()">Search</button>
     </div>
@@ -605,7 +617,23 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
     </div>
     <div class="sfg"><label>Email</label><input id="su-email" type="email" placeholder="you@example.com"></div>
     <div class="sfg" id="an"><label>Act / band name</label><input id="su-actname" type="text" placeholder="e.g. The Reel Sisters"></div>
-    <div class="sfg"><label>County</label><select id="su-county"><option>Dublin</option><option>Cork</option><option>Galway</option><option>Limerick</option><option>Kilkenny</option><option>Clare</option><option>Kerry</option><option>Tipperary</option><option>Waterford</option><option>Wexford</option></select></div>
+    <div class="sfg"><label>County</label><select id="su-county">
+      <optgroup label="Leinster">
+        <option>Dublin</option><option>Wicklow</option><option>Wexford</option><option>Carlow</option>
+        <option>Kilkenny</option><option>Waterford</option><option>Kildare</option><option>Meath</option>
+        <option>Louth</option><option>Westmeath</option><option>Offaly</option><option>Laois</option><option>Longford</option>
+      </optgroup>
+      <optgroup label="Munster">
+        <option>Cork</option><option>Kerry</option><option>Limerick</option><option>Clare</option><option>Tipperary</option>
+      </optgroup>
+      <optgroup label="Connacht">
+        <option>Galway</option><option>Mayo</option><option>Sligo</option><option>Roscommon</option><option>Leitrim</option>
+      </optgroup>
+      <optgroup label="Ulster">
+        <option>Donegal</option><option>Cavan</option><option>Monaghan</option><option>Antrim</option>
+        <option>Armagh</option><option>Derry</option><option>Down</option><option>Fermanagh</option><option>Tyrone</option>
+      </optgroup>
+    </select></div>
     <div class="sfg" id="travel-group">
       <label>Counties willing to play in <span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:0.72rem">(select all that apply)</span></label>
       <div id="county-checks" style="margin-top:8px">
@@ -1905,14 +1933,21 @@ function openConversationById(convId, otherId, otherName, otherAvatar) {
       <div class="edit-field"><label>Act / band name</label><input id="ep-actname" type="text" placeholder="e.g. The Reel Sisters"></div>
       <div class="edit-field"><label>County</label>
         <select id="ep-county">
-          <option>Dublin</option><option>Cork</option><option>Galway</option><option>Limerick</option>
-          <option>Kilkenny</option><option>Clare</option><option>Kerry</option><option>Tipperary</option>
-          <option>Waterford</option><option>Wexford</option><option>Wicklow</option><option>Meath</option>
-          <option>Kildare</option><option>Louth</option><option>Westmeath</option><option>Offaly</option>
-          <option>Laois</option><option>Longford</option><option>Carlow</option><option>Mayo</option>
-          <option>Sligo</option><option>Roscommon</option><option>Leitrim</option><option>Donegal</option>
-          <option>Cavan</option><option>Monaghan</option><option>Antrim</option><option>Armagh</option>
-          <option>Derry</option><option>Down</option><option>Fermanagh</option><option>Tyrone</option>
+          <optgroup label="Leinster">
+            <option>Dublin</option><option>Wicklow</option><option>Wexford</option><option>Carlow</option>
+            <option>Kilkenny</option><option>Waterford</option><option>Kildare</option><option>Meath</option>
+            <option>Louth</option><option>Westmeath</option><option>Offaly</option><option>Laois</option><option>Longford</option>
+          </optgroup>
+          <optgroup label="Munster">
+            <option>Cork</option><option>Kerry</option><option>Limerick</option><option>Clare</option><option>Tipperary</option>
+          </optgroup>
+          <optgroup label="Connacht">
+            <option>Galway</option><option>Mayo</option><option>Sligo</option><option>Roscommon</option><option>Leitrim</option>
+          </optgroup>
+          <optgroup label="Ulster">
+            <option>Donegal</option><option>Cavan</option><option>Monaghan</option><option>Antrim</option>
+            <option>Armagh</option><option>Derry</option><option>Down</option><option>Fermanagh</option><option>Tyrone</option>
+          </optgroup>
         </select>
       </div>
       <div class="edit-field">
