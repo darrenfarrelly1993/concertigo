@@ -472,18 +472,23 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
   <div class="prof-hero">
   <div class="prof-hero-inner">
     <div class="prof-back" onclick="go('browse')">← Back to results</div>
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem">
-    <div class="prof-top">
-      <div class="prof-av">🎻</div>
-      <div class="prof-info">
-        <h1>Siobhán &amp; The Reel</h1>
-        <div class="psub">Traditional Irish · Dublin · Trio</div>
-        <div class="pbadges">
-          <span class="pb pb-lime">★ 4.9 — 87 reviews</span>
-          <span class="pb pb-dim">✓ Verified</span>
-          <span class="pb pb-dim">Available this month</span>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div class="prof-top">
+        <div class="prof-av">🎻</div>
+        <div class="prof-info">
+          <h1>Siobhán &amp; The Reel</h1>
+          <div class="psub">Traditional Irish · Dublin · Trio</div>
+          <div class="pbadges">
+            <span class="pb pb-lime">★ 4.9 — 87 reviews</span>
+            <span class="pb pb-dim">✓ Verified</span>
+            <span class="pb pb-dim">Available this month</span>
+          </div>
         </div>
       </div>
+      <button id="share-btn" onclick="shareProfile()" style="flex-shrink:0;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:0.8rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;color:var(--muted);display:flex;align-items:center;gap:6px" onmouseover="this.style.borderColor='var(--text)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        Share
+      </button>
     </div>
     <div class="prof-tabs">
       <div class="ptab on" onclick="switchTab(this,'tab-overview')">Overview</div>
@@ -491,7 +496,6 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
       <div class="ptab" onclick="switchTab(this,'tab-gigs')">Upcoming Gigs</div>
       <div class="ptab" onclick="switchTab(this,'tab-reviews')">Reviews</div>
     </div>
-  </div><!-- end prof-hero-inner -->
 </div><!-- end prof-hero -->
 <div class="prof-body">
     <div>
