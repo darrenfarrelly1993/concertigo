@@ -1170,10 +1170,12 @@ async function runSearch() {
 async function rGrid(){ await runSearch(); }
 
 function go(s){
+  console.log('go called with:', s);
   const target = document.getElementById('s-'+s);
-  if (!target) { console.error('Screen not found: s-'+s); return; }
+  if (!target) { console.error('Screen not found: s-'+s); alert('Screen not found: ' + s); return; }
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   target.classList.add('active');
+  console.log('Active screen set to:', s, 'display:', target.style.display, 'classes:', target.className);
   window.scrollTo({top:0,behavior:'smooth'});
   if(s==='browse') rGrid();
   if(s==='myprofile') loadMyProfile();
