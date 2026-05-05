@@ -796,7 +796,7 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
 </div>
 
 <!-- LOGIN -->
-<div id="s-login" class="screen">
+<div id="s-login" class="screen" style="padding-top:2rem">
   <div class="su-wrap">
     <h2>Welcome back</h2>
     <p class="su-sub">Sign in to your Concertigo account.</p>
@@ -1086,11 +1086,13 @@ async function handleLogin() {
 
 // Add IDs to signup form fields
 document.addEventListener('DOMContentLoaded', () => {
-  // Check for musician profile hash on load
   const hash = window.location.hash;
   const musicianMatch = hash.match(/^#musician\/([a-f0-9-]+)$/);
   if (musicianMatch) {
     loadPublicProfile(musicianMatch[1]);
+  } else {
+    // Show landing first, initAuth will redirect if logged in
+    document.getElementById('s-landing').classList.add('active');
   }
   initAuth();
   loadStats();
