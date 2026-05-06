@@ -1065,19 +1065,17 @@ async function handleLogin() {
     const data = await res.json();
 
     if (!res.ok || data.error || data.error_description) {
-      errEl.textContent = data.error_description || data.error?.message || data.msg || 'Invalid email or password.';
+      errEl.textContent = data.error_description || data.error?.message || 'Invalid email or password.';
       errEl.style.display = 'block';
       btn.textContent = 'Sign in →';
       btn.disabled = false;
       return;
     }
 
-    // Normalise session — Supabase returns access_token + user at top level
     const accessToken = data.access_token;
     const user = data.user || data.session?.user;
-    const userId = user?.id;
 
-    if (!accessToken || !userId) {
+    if (!accessToken || !user?.id) {
       errEl.textContent = 'Login failed. Please try again.';
       errEl.style.display = 'block';
       btn.textContent = 'Sign in →';
@@ -1087,17 +1085,10 @@ async function handleLogin() {
 
     currentSession = { access_token: accessToken, refresh_token: data.refresh_token, user };
     localStorage.setItem('sb-session', JSON.stringify(currentSession));
-
-    // Get role
-    const roleRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=role', {
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
-    });
-    const roleData = await roleRes.json();
-    currentUserRole = roleData[0]?.role || 'musician';
     updateNavForUser();
     btn.textContent = 'Sign in →';
     btn.disabled = false;
-    go(currentUserRole === 'venue' ? 'dash' : 'myprofile');
+    go('myprofile');
   } catch(e) {
     console.error(e);
     errEl.textContent = 'Something went wrong. Please try again.';
