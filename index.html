@@ -258,7 +258,7 @@ nav{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1
 .cs-option{padding:8px 12px;font-size:0.87rem;color:var(--text);cursor:pointer;transition:background 0.1s}
 .cs-option:hover{background:var(--bg2)}
 .cs-option.selected{color:var(--lime-text);font-weight:500}
-background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.6rem;display:flex;gap:1rem;align-items:flex-start}
+.gig-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.6rem;display:flex;gap:1rem;align-items:flex-start}
 .gig-date-box{background:var(--text);color:#fff;border-radius:8px;padding:8px 12px;text-align:center;min-width:52px;flex-shrink:0}
 .gig-date-box .day{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;line-height:1}
 .gig-date-box .month{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;opacity:0.75}
@@ -362,12 +362,7 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
 <nav>
   <div class="logo" onclick="go('landing')" style="cursor:pointer">concert<span>igo</span></div>
   <div class="nav-links">
-    <a href="#" onclick="event.preventDefault();go('browse')">Find Musicians</a>
-    <a href="#" onclick="event.preventDefault();go('dash')">For Venues</a>
-    <a href="#" id="nav-signin" onclick="event.preventDefault();go('login')">Sign In</a>
-    <a href="#" id="nav-signout" style="display:none" onclick="event.preventDefault();signOut()">Sign Out</a>
-    <a href="#" id="nav-messages" style="display:none" onclick="event.preventDefault();go('messages')">Messages</a>
-    <a href="#" onclick="event.preventDefault();go('signup')" class="nav-cta">Join Free</a>
+    <a href="#" onclick="event.preventDefault();go('browse')">Find Musicians</a><a href="#" onclick="event.preventDefault();go('dash')">For Venues</a><a href="#" id="nav-signin" onclick="event.preventDefault();go('login')">Sign In</a><a href="#" id="nav-signout" style="display:none" onclick="event.preventDefault();signOut()">Sign Out</a><a href="#" id="nav-messages" style="display:none" onclick="event.preventDefault();go('messages')">Messages</a><a href="#" onclick="event.preventDefault();go('signup')" class="nav-cta">Join Free</a>
   </div>
 </nav>
 
