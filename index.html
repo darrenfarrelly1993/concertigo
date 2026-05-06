@@ -270,6 +270,19 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
 .social-link:hover{background:var(--text);color:#fff!important;border-color:var(--text)}
 .social-link svg{flex-shrink:0;color:inherit}
 .date-pill{background:var(--lime-bg);color:var(--lime-text);padding:5px 14px;border-radius:20px;font-size:0.8rem;font-weight:500}
+.conv-item{padding:0.85rem 1rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--border)}
+.conv-item:hover,.conv-item.active{background:var(--bg2)}
+.conv-av{width:38px;height:38px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;overflow:hidden;flex-shrink:0}
+.conv-av img{width:100%;height:100%;object-fit:cover}
+.conv-info{flex:1;min-width:0}
+.conv-name{font-size:0.85rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-preview{font-size:0.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-unread{width:8px;height:8px;border-radius:50%;background:var(--lime);flex-shrink:0}
+.msg-bubble{max-width:70%;padding:9px 13px;border-radius:12px;font-size:0.85rem;line-height:1.5;word-break:break-word}
+.msg-out{background:var(--text);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.msg-in{background:var(--bg2);color:var(--text);align-self:flex-start;border-bottom-left-radius:3px}
+.msg-time{font-size:0.67rem;color:var(--muted);margin-top:2px}
+.msg-out .msg-time{text-align:right}
 
 
 /* ── MOBILE ──────────────────────────────────────────────── */
@@ -490,7 +503,6 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
       <div class="ptab" onclick="switchTab(this,'tab-gigs')">Upcoming Gigs</div>
       <div class="ptab" onclick="switchTab(this,'tab-reviews')">Reviews</div>
     </div>
-  </div><!-- end prof-hero-inner -->
 </div><!-- end prof-hero -->
 <div class="prof-body">
     <div>
@@ -560,9 +572,16 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
 <!-- VENUE DASH -->
 <div id="s-dash" class="screen">
   <div class="dash-top">
-    <h2>Venue dashboard</h2>
-    <p>The Cobblestone, Smithfield · Dublin 7</p>
+    <h2 id="dash-title">Venue dashboard</h2>
+    <p id="dash-sub">Your venue</p>
+    <div class="prof-tabs" style="margin-top:1.2rem">
+      <div class="ptab on" onclick="switchDashTab(this,'dash-tab-main')">Dashboard</div>
+      <div class="ptab" onclick="switchDashTab(this,'dash-tab-profile')">Profile</div>
+    </div>
   </div>
+
+  <!-- DASHBOARD TAB -->
+  <div id="dash-tab-main">
   <div class="dash-body">
     <div class="dcard full">
       <h3>May at a glance</h3>
@@ -600,6 +619,55 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
       <button class="btn-p" onclick="go('browse')">Browse musicians →</button>
     </div>
   </div>
+  </div><!-- end dash-tab-main -->
+
+  <!-- PROFILE TAB -->
+  <div id="dash-tab-profile" style="display:none">
+    <div class="myprof-wrap">
+      <div class="myprof-header">
+        <div class="myprof-avatar-wrap">
+          <div class="myprof-avatar" id="venue-avatar-display" onclick="document.getElementById('venue-avatar-upload').click()">🏛</div>
+          <div class="myprof-avatar-overlay" onclick="document.getElementById('venue-avatar-upload').click()">Change photo</div>
+          <input type="file" id="venue-avatar-upload" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+        </div>
+        <div class="myprof-info">
+          <h2 id="venue-prof-name">Your Venue</h2>
+          <div class="msub" id="venue-prof-sub">Loading...</div>
+        </div>
+      </div>
+      <div class="myprof-section">
+        <h3>Venue details</h3>
+        <div class="edit-field"><label>Venue name</label><input id="vp-actname" type="text" placeholder="e.g. The Cobblestone"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+          <div class="edit-field"><label>First name</label><input id="vp-firstname" type="text"></div>
+          <div class="edit-field"><label>Last name</label><input id="vp-lastname" type="text"></div>
+        </div>
+        <div class="edit-field"><label>County</label>
+          <select id="vp-county">
+            <optgroup label="Leinster"><option>Dublin</option><option>Wicklow</option><option>Wexford</option><option>Carlow</option><option>Kilkenny</option><option>Waterford</option><option>Kildare</option><option>Meath</option><option>Louth</option><option>Westmeath</option><option>Offaly</option><option>Laois</option><option>Longford</option></optgroup>
+            <optgroup label="Munster"><option>Cork</option><option>Kerry</option><option>Limerick</option><option>Clare</option><option>Tipperary</option></optgroup>
+            <optgroup label="Connacht"><option>Galway</option><option>Mayo</option><option>Sligo</option><option>Roscommon</option><option>Leitrim</option></optgroup>
+            <optgroup label="Ulster"><option>Donegal</option><option>Cavan</option><option>Monaghan</option><option>Antrim</option><option>Armagh</option><option>Derry</option><option>Down</option><option>Fermanagh</option><option>Tyrone</option></optgroup>
+          </select>
+        </div>
+      </div>
+      <div class="myprof-section">
+        <h3>About</h3>
+        <div class="edit-field"><label>Bio</label><textarea id="vp-bio" placeholder="Tell musicians about your venue — capacity, style, what kind of acts you book…"></textarea></div>
+      </div>
+      <div class="myprof-section">
+        <h3>Social media</h3>
+        <div class="edit-field"><label>Instagram URL</label><input id="vp-instagram" type="url" placeholder="https://instagram.com/yourvenue"></div>
+        <div class="edit-field"><label>Facebook URL</label><input id="vp-facebook" type="url" placeholder="https://facebook.com/yourvenue"></div>
+        <div class="edit-field"><label>Website</label><input id="vp-website" type="url" placeholder="https://yourvenue.ie"></div>
+      </div>
+      <div style="display:flex;align-items:center;margin-top:0.5rem">
+        <button class="save-btn" onclick="saveVenueProfile()">Save profile</button>
+        <span class="save-msg" id="venue-save-msg">✅ Saved!</span>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- SIGNUP -->
@@ -733,7 +801,7 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
 </div>
 
 <!-- LOGIN -->
-<div id="s-login" class="screen">
+<div id="s-login" class="screen" style="padding-top:2rem">
   <div class="su-wrap">
     <h2>Welcome back</h2>
     <p class="su-sub">Sign in to your Concertigo account.</p>
@@ -765,6 +833,7 @@ async function supaFetch(path, options={}) {
 
 let currentSession = null;
 let currentRole = 'musician';
+let currentUserRole = 'musician';
 
 // Check for existing session on load
 async function saveProfile(userId, accessToken) {
@@ -790,26 +859,24 @@ async function initAuth() {
   if (hash.includes('access_token')) {
     const params = new URLSearchParams(hash.replace('#', '?'));
     const accessToken = params.get('access_token');
-    const userId = params.get('user_id') || null;
-
     if (accessToken) {
-      // Get user details
-      const userRes = await fetch(SUPA_URL + '/auth/v1/user', {
-        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
-      });
-      const userData = await userRes.json();
-      if (userData.id) {
-        currentSession = { access_token: accessToken, user: userData };
-        localStorage.setItem('sb-session', JSON.stringify(currentSession));
-        await saveProfile(userData.id, accessToken);
-        updateNavForUser();
-        // Show login page with success message
-        go('login');
-        const msg = document.createElement('div');
-        msg.style.cssText = 'color:#27ae60;font-size:0.85rem;margin-bottom:1rem;text-align:center';
-        msg.textContent = '✅ Email confirmed! You\'re all set.';
-        document.querySelector('#s-login .su-wrap').insertBefore(msg, document.querySelector('#s-login .toggle-row') || document.querySelector('#s-login .sfg'));
-      }
+      try {
+        const userRes = await fetch(SUPA_URL + '/auth/v1/user', {
+          headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
+        });
+        const userData = await userRes.json();
+        if (userData.id) {
+          currentSession = { access_token: accessToken, user: userData };
+          localStorage.setItem('sb-session', JSON.stringify(currentSession));
+          await saveProfile(userData.id, accessToken);
+          const rRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userData.id + '&select=role', {
+            headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
+          });
+          const rData = await rRes.json();
+          currentUserRole = rData[0]?.role || 'musician';
+          updateNavForUser();
+        }
+      } catch(e) { console.error(e); }
       window.history.replaceState({}, document.title, window.location.pathname);
       return;
     }
@@ -818,23 +885,35 @@ async function initAuth() {
   const stored = localStorage.getItem('sb-session');
   if (stored) {
     try {
-      currentSession = JSON.parse(stored);
-      // Refresh the session token
-      const refreshToken = currentSession.refresh_token;
-      if (refreshToken) {
+      const parsed = JSON.parse(stored);
+      currentSession = {
+        access_token: parsed.access_token,
+        refresh_token: parsed.refresh_token,
+        user: parsed.user || parsed.session?.user
+      };
+      if (!currentSession.access_token || !currentSession.user?.id) {
+        localStorage.removeItem('sb-session');
+        return;
+      }
+      // Refresh token
+      if (currentSession.refresh_token) {
         const refreshRes = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
           method: 'POST',
           headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refresh_token: refreshToken })
+          body: JSON.stringify({ refresh_token: currentSession.refresh_token })
         });
         const refreshData = await refreshRes.json();
         if (refreshData.access_token) {
-          currentSession = refreshData;
+          currentSession = {
+            access_token: refreshData.access_token,
+            refresh_token: refreshData.refresh_token,
+            user: refreshData.user || currentSession.user
+          };
           localStorage.setItem('sb-session', JSON.stringify(currentSession));
         }
       }
       updateNavForUser();
-    } catch(e) { console.error('Session restore error:', e); }
+    } catch(e) { console.error('Session restore error:', e); localStorage.removeItem('sb-session'); }
   }
 }
 
@@ -844,8 +923,8 @@ function updateNavForUser() {
   const signOutLink = document.getElementById('nav-signout');
   const navMessages = document.getElementById('nav-messages');
   if (currentSession) {
-    cta.textContent = 'My Profile';
-    cta.onclick = () => go('myprofile');
+    cta.textContent = currentUserRole === 'venue' ? 'Dashboard' : 'My Profile';
+    cta.onclick = () => go(currentUserRole === 'venue' ? 'dash' : 'myprofile');
     if (signInLink) signInLink.style.display = 'none';
     if (signOutLink) signOutLink.style.display = '';
     if (navMessages) navMessages.style.display = '';
@@ -985,21 +1064,42 @@ async function handleLogin() {
     });
     const data = await res.json();
 
-    if (data.error) {
-      errEl.textContent = data.error.message || 'Invalid email or password.';
+    if (!res.ok || data.error || data.error_description) {
+      errEl.textContent = data.error_description || data.error?.message || data.msg || 'Invalid email or password.';
       errEl.style.display = 'block';
       btn.textContent = 'Sign in →';
       btn.disabled = false;
       return;
     }
 
-    currentSession = data;
-    localStorage.setItem('sb-session', JSON.stringify(data));
+    // Normalise session — Supabase returns access_token + user at top level
+    const accessToken = data.access_token;
+    const user = data.user || data.session?.user;
+    const userId = user?.id;
+
+    if (!accessToken || !userId) {
+      errEl.textContent = 'Login failed. Please try again.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Sign in →';
+      btn.disabled = false;
+      return;
+    }
+
+    currentSession = { access_token: accessToken, refresh_token: data.refresh_token, user };
+    localStorage.setItem('sb-session', JSON.stringify(currentSession));
+
+    // Get role
+    const roleRes = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=role', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
+    });
+    const roleData = await roleRes.json();
+    currentUserRole = roleData[0]?.role || 'musician';
     updateNavForUser();
     btn.textContent = 'Sign in →';
     btn.disabled = false;
-    go('myprofile');
+    go(currentUserRole === 'venue' ? 'dash' : 'myprofile');
   } catch(e) {
+    console.error(e);
     errEl.textContent = 'Something went wrong. Please try again.';
     errEl.style.display = 'block';
     btn.textContent = 'Sign in →';
@@ -1009,6 +1109,7 @@ async function handleLogin() {
 
 // Add IDs to signup form fields
 document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('s-landing').classList.add('active');
   initAuth();
   loadStats();
 });
@@ -1092,13 +1193,17 @@ async function runSearch() {
 async function rGrid(){ await runSearch(); }
 
 function go(s){
+  const target = document.getElementById('s-'+s);
+  if (!target) { console.error('Screen not found: s-'+s); return; }
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
-  document.getElementById('s-'+s).classList.add('active');
+  target.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
   if(s==='browse') rGrid();
   if(s==='myprofile') loadMyProfile();
   if(s==='messages') loadConversations();
+  if(s==='dash') loadVenueDashboard();
 }
+
 function toggleProvince(el, province){
   const pills = document.querySelectorAll('.county-pill.' + province);
   const allOn = [...pills].every(p => p.classList.contains('on'));
@@ -1640,6 +1745,70 @@ async function loadPublicProfile(id) {
   } catch(e) { console.error(e); }
 }
 
+function switchDashTab(el, tabId) {
+  document.querySelectorAll('.dash-top .ptab').forEach(t => t.classList.remove('on'));
+  document.getElementById('dash-tab-main').style.display = 'none';
+  document.getElementById('dash-tab-profile').style.display = 'none';
+  el.classList.add('on');
+  document.getElementById(tabId).style.display = 'block';
+}
+
+async function loadVenueDashboard() {
+  if (!currentSession) { go('login'); return; }
+  const userId = currentSession.user?.id || currentSession.id;
+  const token = currentSession.access_token;
+  try {
+    const res = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=*', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    const p = data[0];
+    if (!p) return;
+    const name = p.act_name || p.first_name || 'Your venue';
+    document.getElementById('dash-title').textContent = name;
+    document.getElementById('dash-sub').textContent = p.county || 'Ireland';
+
+    // Populate profile tab
+    document.getElementById('venue-prof-name').textContent = name;
+    document.getElementById('venue-prof-sub').textContent = p.county || '';
+    document.getElementById('vp-firstname').value = p.first_name || '';
+    document.getElementById('vp-lastname').value = p.last_name || '';
+    document.getElementById('vp-actname').value = p.act_name || '';
+    document.getElementById('vp-bio').value = p.bio || '';
+    document.getElementById('vp-instagram').value = p.instagram || '';
+    document.getElementById('vp-facebook').value = p.facebook || '';
+    document.getElementById('vp-website').value = p.website || '';
+    if (p.county) document.getElementById('vp-county').value = p.county;
+    if (p.avatar_url) document.getElementById('venue-avatar-display').innerHTML = `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
+  } catch(e) { console.error(e); }
+}
+
+async function saveVenueProfile() {
+  if (!currentSession) return;
+  const userId = currentSession.user?.id || currentSession.id;
+  const updates = {
+    first_name: document.getElementById('vp-firstname').value.trim(),
+    last_name: document.getElementById('vp-lastname').value.trim(),
+    act_name: document.getElementById('vp-actname').value.trim(),
+    bio: document.getElementById('vp-bio').value.trim(),
+    county: document.getElementById('vp-county').value,
+    instagram: document.getElementById('vp-instagram').value.trim() || null,
+    facebook: document.getElementById('vp-facebook').value.trim() || null,
+    website: document.getElementById('vp-website').value.trim() || null,
+  };
+  await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + userId, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + currentSession.access_token, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify(updates)
+  });
+  document.getElementById('venue-prof-name').textContent = updates.act_name || updates.first_name;
+  document.getElementById('venue-prof-sub').textContent = updates.county;
+  document.getElementById('venue-save-msg').style.display = 'inline';
+  setTimeout(() => document.getElementById('venue-save-msg').style.display = 'none', 3000);
+}
+
+
+
 async function loadStats(){
   try {
     const headers = { 
@@ -2114,21 +2283,5 @@ function openConversationById(convId, otherId, otherName, otherAvatar) {
 
   </div>
 </div>
-
-<style>
-.conv-item{padding:0.85rem 1rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--border)}
-.conv-item:hover,.conv-item.active{background:var(--bg2)}
-.conv-av{width:38px;height:38px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;overflow:hidden;flex-shrink:0}
-.conv-av img{width:100%;height:100%;object-fit:cover}
-.conv-info{flex:1;min-width:0}
-.conv-name{font-size:0.85rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.conv-preview{font-size:0.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.conv-unread{width:8px;height:8px;border-radius:50%;background:var(--lime);flex-shrink:0}
-.msg-bubble{max-width:70%;padding:9px 13px;border-radius:12px;font-size:0.85rem;line-height:1.5;word-break:break-word}
-.msg-out{background:var(--text);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
-.msg-in{background:var(--bg2);color:var(--text);align-self:flex-start;border-bottom-left-radius:3px}
-.msg-time{font-size:0.67rem;color:var(--muted);margin-top:2px}
-.msg-out .msg-time{text-align:right}
-</style>
 
 </html>
