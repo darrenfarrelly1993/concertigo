@@ -1185,14 +1185,13 @@ async function rGrid(){ await runSearch(); }
 
 function go(s){
   const target = document.getElementById('s-'+s);
-  if (!target) { console.error('Screen not found: s-'+s); return; }
+  if (!target) { return; }
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   target.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
   if(s==='browse') rGrid();
   if(s==='myprofile') loadMyProfile();
   if(s==='messages') loadConversations();
-  if(s==='dash') loadVenueDashboard();
 }
 
 function toggleProvince(el, province){
