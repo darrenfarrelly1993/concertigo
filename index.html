@@ -362,12 +362,12 @@ background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:
 <nav>
   <div class="logo" onclick="go('landing')" style="cursor:pointer">concert<span>igo</span></div>
   <div class="nav-links">
-    <a onclick="go('browse')">Find Musicians</a>
-    <a onclick="go('dash')">For Venues</a>
-    <a id="nav-signin" onclick="go('login')">Sign In</a>
-    <a id="nav-signout" style="display:none" onclick="signOut()">Sign Out</a>
-    <a id="nav-messages" style="display:none" onclick="go('messages')">Messages</a>
-    <a onclick="go('signup')" class="nav-cta">Join Free</a>
+    <a href="#" onclick="event.preventDefault();go('browse')">Find Musicians</a>
+    <a href="#" onclick="event.preventDefault();go('dash')">For Venues</a>
+    <a href="#" id="nav-signin" onclick="event.preventDefault();go('login')">Sign In</a>
+    <a href="#" id="nav-signout" style="display:none" onclick="event.preventDefault();signOut()">Sign Out</a>
+    <a href="#" id="nav-messages" style="display:none" onclick="event.preventDefault();go('messages')">Messages</a>
+    <a href="#" onclick="event.preventDefault();go('signup')" class="nav-cta">Join Free</a>
   </div>
 </nav>
 
