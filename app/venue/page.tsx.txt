@@ -1,0 +1,51 @@
+import Link from 'next/link'
+
+export const metadata = {
+  title: 'For Venues — Concertigo',
+  description: 'Find and book the best musicians for your venue across Ireland.',
+}
+
+export default function VenuesPage() {
+  return (
+    <div>
+      <div style={{background:'var(--bg)',borderBottom:'1px solid var(--border)',padding:'4rem 2rem',textAlign:'center'}}>
+        <div style={{fontSize:'0.7rem',textTransform:'uppercase',letterSpacing:'0.1em',color:'var(--lime-text)',marginBottom:'0.6rem',fontWeight:600}}>For Venues</div>
+        <h1 style={{fontSize:'clamp(2rem,5vw,3.5rem)',fontWeight:800,letterSpacing:'-0.04em',marginBottom:'1rem'}}>The easiest way to book live music</h1>
+        <p style={{color:'var(--muted)',fontSize:'1rem',maxWidth:'480px',margin:'0 auto 2.5rem',lineHeight:1.7,fontWeight:300}}>Browse verified musicians, check availability and manage bookings — all in one place. One-time €15 signup.</p>
+        <div style={{display:'flex',gap:'0.75rem',justifyContent:'center',flexWrap:'wrap'}}>
+          <Link href="/signup" className="btn-p">Get started — €15</Link>
+          <Link href="/musicians" className="btn-g">Browse musicians first</Link>
+        </div>
+      </div>
+
+      <div className="section-wrap">
+        <div className="cta-split" style={{marginTop:0}}>
+          <div className="cta-box">
+            <div className="cta-icon">🔍</div>
+            <h3>Browse & filter</h3>
+            <p>Search by genre, county, price and availability. See real profiles with photos, samples and reviews.</p>
+          </div>
+          <div className="cta-box">
+            <div className="cta-icon">💬</div>
+            <h3>Message directly</h3>
+            <p>No agents or middlemen. Message musicians directly and get a response within 24 hours.</p>
+          </div>
+          <div className="cta-box">
+            <div className="cta-icon">📅</div>
+            <h3>Manage bookings</h3>
+            <p>Keep track of all your bookings, upcoming gigs and enquiries from your dashboard.</p>
+          </div>
+          <div className="cta-box">
+            <div className="cta-icon">⭐</div>
+            <h3>Leave reviews</h3>
+            <p>After each gig, leave a review to help other venues and build your roster of trusted acts.</p>
+          </div>
+        </div>
+
+        <div style={{textAlign:'center',marginTop:'3rem'}}>
+          <Link href="/signup" className="btn-p">Join as a venue — €15 once off</Link>
+        </div>
+      </div>
+    </div>
+  )
+}
