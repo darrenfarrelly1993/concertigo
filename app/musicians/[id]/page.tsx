@@ -47,11 +47,6 @@ export default async function MusicianPage({ params }: { params: { id: string } 
             </div>
           </div>
         </div>
-        <div className="prof-tabs" id="prof-tabs-nav">
-          {['Overview','Media','Upcoming Gigs','Reviews'].map(tab => (
-            <div key={tab} className="ptab" onClick={() => {}} data-tab={tab}>{tab}</div>
-          ))}
-        </div>
       </div>
       <div className="prof-body">
         <ProfileTabs profile={profile} gigs={gigs || []} reviews={reviews || []} musicianId={params.id} currentUserId={user?.id} />
